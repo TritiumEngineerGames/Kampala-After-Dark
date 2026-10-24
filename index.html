@@ -222,7 +222,10 @@ function push(){if(pend||!hostP)return;pend=1;setTimeout(()=>{pend=0;P.forEach(p
 
 // ================= game setup (host) =================
 function BR(n){
- if(n<=4)return sh(['Chairman','Gangster','Resident','Resident'].slice(0,n));
+ if(n<=4){
+  if(n===4)return sh(['Chairman','Gangster','Resident',Math.random()<.5?'Hustler':'Survivor']);
+  return sh(['Chairman','Gangster','Resident'].slice(0,n));
+ }
  const cr=n<=7?2:n<=10?3:4,l=['Chairman',...Array(cr).fill('Gangster')];
  if(n<=9)l.push(Math.random()<.5?'Hustler':'Survivor');else l.push('Hustler','Survivor');
  while(l.length<n)l.push('Resident');return sh(l)
