@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kampala: After Dark</title>
 <style>
@@ -19,7 +21,7 @@ input[type=number]{width:4.5em}
 #st{color:var(--rd);min-height:1.4em}
 #mem div{padding:3px 0}
 p{color:#cfcbe0}
-#bar{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;padding:8px 14px;background:#000a;position:sticky;top:0;z-index:2}
+#bar{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:8px 14px;background:#000a;position:sticky;top:0;z-index:2}
 #ban{color:var(--or);font-weight:600}
 .cols{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1.2fr);gap:12px;padding:12px}
 @media(max-width:760px){.cols{grid-template-columns:1fr}}
@@ -39,11 +41,23 @@ h3{margin:0 0 6px;color:var(--mu);font-size:.85em;text-transform:uppercase;lette
 #box{background:var(--pn);border:2px solid var(--or);border-radius:12px;padding:20px;max-width:560px;width:92%;text-align:center;max-height:92vh;overflow:auto}
 #box button{margin:8px 6px 0}
 [hidden]{display:none!important}
-</style></head><body>
-
+#help{position:fixed;inset:0;background:#000b;display:grid;place-items:center;padding:12px;z-index:8}
+#helpbox{background:var(--pn);border:2px solid var(--or);border-radius:12px;padding:18px;width:min(600px,100%);max-height:90vh;overflow:auto}
+.helptop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.helptop h2{color:var(--or);margin:0}
+.helptabs{display:flex;gap:6px;margin:16px 0}
+.helptabs button{flex:1;padding:10px 4px}
+.helptabs button.active{background:#c9731a;border-color:var(--or)}
+.helpitem{padding:10px 4px;border-bottom:1px solid #ffffff18}
+.helpitem b{color:var(--or)}
+.helpitem p{margin:4px 0 0}
+.helpnote{font-size:.85em;color:var(--mu)}
+</style>
+</head>
+<body>
 <div id="menu" class="wrap">
  <h1>KAMPALA: AFTER DARK</h1>
- <p>A game of hidden roles on the streets of Kampala, inspired by <i>Bang!</i>. One person hosts, friends join from their own devices with a code, and bots fill the empty seats (8–12 players total).</p>
+ <p>A game of hidden roles on the streets of Kampala, inspired by <i>Bang!</i>. One person hosts, friends join from their own devices with a code, and bots fill the empty seats (4–12 players total).</p>
  <div class="box">Your name: <input id="nm" maxlength="14" placeholder="Name"></div>
  <div class="box"><b>Host a game</b><br><br><button class="btn" onclick="hostGame()">Create game</button></div>
  <div class="box"><b>Join a game</b><br><br>Code: <input id="jc" maxlength="5" placeholder="ABCDE" style="text-transform:uppercase;width:6em"> <button class="btn" onclick="joinGame()">Join</button></div>
@@ -55,14 +69,14 @@ h3{margin:0 0 6px;color:var(--mu);font-size:.85em;text-transform:uppercase;lette
  <h1>Lobby</h1>
  <div class="box">Join code<br><span class="big" id="code"></span><br><small id="lnk" style="color:var(--mu);word-break:break-all"></small><br><br><button class="ghost" onclick="copyLink()">Copy invite link</button></div>
  <div class="box"><b>Players here</b><div id="mem"></div></div>
- <div id="hostctl" class="box">Total players, bots fill the rest (8–12): <input id="nt" type="number" min="8" max="12" value="8"><br><br><button class="btn" onclick="startNet()">Start game</button></div>
+ <div id="hostctl" class="box">Total players, bots fill the rest (4–12): <input id="nt" type="number" min="4" max="12" value="4"><br><br><button class="btn" onclick="startNet()">Start game</button></div>
  <p id="lwait">Waiting for the host to start…</p>
  <div id="st2" style="color:var(--rd)"></div>
  <button class="ghost" onclick="location.href=location.pathname">Leave</button>
 </div>
 
 <div id="game" hidden>
- <div id="bar"><span id="info"></span><span id="ban"></span></div>
+ <div id="bar"><span id="info"></span><span id="ban"></span><button class="ghost" onclick="openHelp()">Help ?</button></div>
  <div class="cols">
   <section><h3>Players, in seating order (neighbours sit next to each other)</h3><div id="pl"></div></section>
   <section><h3>What has happened</h3><div id="log"></div></section>
@@ -71,6 +85,20 @@ h3{margin:0 0 6px;color:var(--mu);font-size:.85em;text-transform:uppercase;lette
  <div id="hand"></div>
  <div class="wrap" style="padding-top:0"><button class="btn" id="end" onclick="act({k:'end'})">End turn</button></div>
 </div>
+
+<div id="help" hidden>
+ <div id="helpbox">
+  <div class="helptop"><h2>Game Help</h2><button class="ghost" onclick="closeHelp()">Close ✕</button></div>
+  <div class="helptabs">
+   <button class="ghost active" data-tab="roles" onclick="helpTab('roles')">Roles</button>
+   <button class="ghost" data-tab="chars" onclick="helpTab('chars')">Characters</button>
+   <button class="ghost" data-tab="cards" onclick="helpTab('cards')">Cards</button>
+  </div>
+  <div id="helpcontent"></div>
+  <p class="helpnote">Help does not pause the game. Close this window to return to play.</p>
+ </div>
+</div>
+
 <div id="ov" hidden><div id="box"></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -88,11 +116,45 @@ const COL=['#9e2e2e','#335aa6','#338f4d','#bf731f','#737333','#4d4d99','#998019'
 const CH=[['Boda Rider','range','Mugging range +1.'],['Mama Ntilie','heal','Rolex heals 2 HP.'],['Street Vendor','vend','Draw 3 if your hand is empty at turn start.'],['Pickpocket','pick','Mobile Money: take a card without giving one.'],['Lawyer','law','Police Checks on you fail.'],['Journalist','jour','Draw a card when you play Phone Call.'],['Bouncer','enf','Any number of Muggings per turn.'],['Matatu Conductor','cond','Draw a card when you play Matatu.'],['Night Guard','guard','+1 max HP.'],['Makerere Student','stu','First draw each turn comes from the discard pile.'],['MP Hopeful','pol','Draw a card whenever you survive damage.'],['Owino Trader','trade','Mobile Money gives you 2 coins instead of 1.']];
 const NAMES=['Mukasa','Nakato','Okello','Atim','Kato','Namatovu','Ssemakula','Achieng','Byaruhanga','Nambi','Opio','Tumusiime','Akello','Wasswa'];
 
-// host-side game state
-let P=[],seats=[],order=[],ptr=0,deck=[],disc=[],log=[],round=1,over=0,wt='',winners=[],cur=null,waitOn=null,sel=null,idle='',prompts={},hostP=null,finInfo=null;
-// network state
-let phase='menu',peer=null,conn=null,isHost=false,members=[],CODE='',myName='';
+// In-game help data. Descriptions are kept here so the help menu can be updated easily.
+const HELP_ROLES=[
+ ['LC Chairman','Community','Survive. The Chairman is publicly identified at the start.'],
+ ['Resident','Community','Protect the Chairman and find the Criminals. The Community wins when the Criminal Network and all Independent roles are gone.'],
+ ['Gangster','Criminal Network','Eliminate the LC Chairman. If the Chairman falls, the Criminal Network takes over Kampala.'],
+ ['Hustler','Independent','Win alone by collecting 6 coins through Mobile Money.'],
+ ['Survivor','Independent','Win alone by remaining alive when round 13 begins.']
+];
+function helpTab(tab){
+ document.querySelectorAll('.helptabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+ let items=[];
+ if(tab==='roles') items=HELP_ROLES.map(([name,team,desc])=>({name,desc,team}));
+ if(tab==='chars') items=CH.map(ch=>({name:ch[0],desc:ch[2]}));
+ if(tab==='cards') items=CT.map((card,i)=>({name:card[0],desc:helpCardDescription(i)}));
+ $('helpcontent').innerHTML=items.map(x=>`<div class="helpitem"><b>${x.name}${x.team?` · ${x.team}`:''}</b><p>${x.desc}</p></div>`).join('');
+}
+function helpCardDescription(i){
+ const descriptions=[
+  'Play on a player within your Mugging range to deal 1 damage. Normally limited to one Mugging per turn. Boda Rider increases range; Bouncer removes the per-turn limit.',
+  'Reaction card. When someone mugs you, play Shortcut to cancel that Mugging and avoid its damage.',
+  'Restore 1 HP, up to your maximum HP. Mama Ntilie restores 2 HP instead.',
+  'Move any player, including yourself, two seats around the table.',
+  'Disable the target player’s character ability until their turn ends.',
+  'Privately reveal the target player’s role to yourself. A Lawyer cannot be successfully checked.',
+  'Take a random card from the target and give them one of your cards at random. Both players gain coins; Owino Trader gains 2 coins instead of 1, and Pickpocket does not give a card back.',
+  'The target skips their next turn.',
+  'Each player with cards must discard one card. Human players choose which card to discard.',
+  'Shuffle the seats of three randomly selected players. Matatu Conductor draws a card when playing this.',
+  'You and the target privately learn each other’s roles. Journalist draws an additional card when playing Phone Call.',
+  'Randomly reshuffle the turn order.'
+ ];
+ return descriptions[i];
+}
+function openHelp(){if($('game').hidden)return;helpTab('roles');$('help').hidden=false}
+function closeHelp(){$('help').hidden=true}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp()});
 
+let P=[],seats=[],order=[],ptr=0,deck=[],disc=[],log=[],round=1,over=0,wt='',winners=[],cur=null,waitOn=null,sel=null,idle='',prompts={},hostP=null,finInfo=null;
+let phase='menu',peer=null,conn=null,isHost=false,members=[],CODE='',myName='';
 const has=(p,k)=>p.ch[1]===k&&!p.cut, first=p=>p.name.split(' ')[0], rng=p=>2+(has(p,'range')?1:0);
 const kr=(v,o)=>(v&&v===o)||o.rev||!o.alive?o.role:(v&&v.known[o.i])||null;
 function dist(a,b){const n=seats.length,d=Math.abs(seats.indexOf(a)-seats.indexOf(b));return Math.min(d,n-d)}
@@ -159,7 +221,12 @@ function push(){if(pend||!hostP)return;pend=1;setTimeout(()=>{pend=0;P.forEach(p
  if(p===hostP)render(v);else if(p.conn&&p.conn.open)p.conn.send({t:'view',v})})},30)}
 
 // ================= game setup (host) =================
-function BR(n){const cr=n<=10?3:4,l=['Chairman',...Array(cr).fill('Gangster')];if(n<=9)l.push(Math.random()<.5?'Hustler':'Survivor');else l.push('Hustler','Survivor');while(l.length<n)l.push('Resident');return sh(l)}
+function BR(n){
+ if(n<=4)return sh(['Chairman','Gangster','Resident','Resident'].slice(0,n));
+ const cr=n<=7?2:n<=10?3:4,l=['Chairman',...Array(cr).fill('Gangster')];
+ if(n<=9)l.push(Math.random()<.5?'Hustler':'Survivor');else l.push('Hustler','Survivor');
+ while(l.length<n)l.push('Resident');return sh(l)
+}
 function draw(p,k=1){while(k--){if(!deck.length){if(!disc.length)return;deck=sh(disc);disc=[];L('The deck is reshuffled.')}p.hand.push(deck.pop())}}
 function setup(n,mem){
  P=[];log=[];deck=[];disc=[];over=0;round=1;cur=null;waitOn=null;sel=null;idle='';prompts={};finInfo=null;hostP=null;
@@ -172,12 +239,14 @@ function setup(n,mem){
  P.forEach(p=>draw(p,4));
 }
 function startNet(){
- const H=members.length,n=Math.min(12,Math.max(8,H,+$('nt').value||8)),mem=sh([...members.filter(m=>!m.conn||m.conn.open)]);
+ const H=members.length;
+ const requested=parseInt($('nt').value,10)||4;
+ const n=Math.min(12,Math.max(4,H,requested));
+ const mem=sh([...members.filter(m=>!m.conn||m.conn.open)]);
  const seen={};mem.forEach(m=>{const k=m.name.toLowerCase();seen[k]=(seen[k]||0)+1;if(seen[k]>1)m.name+=' '+seen[k]});
- NAMES.forEach(x=>{}); // bot names may clash with players; harmless
  setup(n,mem);phase='game';show('game');run();
 }
-function toLobby(){phase='lobby';P=[];hostP=null;prompts={};waitOn=null;members=members.filter(m=>!m.conn||m.conn.open);$('ov').hidden=true;lobbyPush()}
+function toLobby(){phase='lobby';P=[];hostP=null;prompts={};waitOn=null;$('ov').hidden=true;members=members.filter(m=>!m.conn||m.conn.open);lobbyPush()}
 
 // ================= host input handling =================
 function waitFor(p,mode,msg){return new Promise(r=>{waitOn={p,mode,msg,res:r};sel=null;push()})}
@@ -408,4 +477,6 @@ function render(v){
 
 // auto-fill the join code from an invite link (?join=ABCDE)
 const qj=new URLSearchParams(location.search).get('join');if(qj)$('jc').value=qj.slice(0,5).toUpperCase();
-</script></body></html>
+</script>
+</body>
+</html>
