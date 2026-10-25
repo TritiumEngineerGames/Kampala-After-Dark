@@ -150,7 +150,7 @@ footer {text-align:center;color:var(--muted);padding:18px;font-size:13px}
         <div class="actions">
           <button onclick="startNet()">Start game</button>
         </div>
-        <p class="muted">Bots fill any empty seats up to your selected player count.</p>
+        <p class="muted">Bots fill any empty seats up to your selected player count. Games require at least four players.</p>
       </div>
       <p id="lwait" class="muted">Waiting for the host to start the game.</p>
       <p id="st2" class="status muted" role="status"></p>
@@ -212,6 +212,16 @@ footer {text-align:center;color:var(--muted);padding:18px;font-size:13px}
           Hustler: collect 6 coins. Survivor: remain alive through the end of
           round 12. Gossip: learn 5 distinct roles while alive. Bounty Hunter:
           personally eliminate 2 players.
+        </details>
+        <details>
+          <summary>Characters</summary>
+          Each player also receives a unique character with a special ability.
+          Boda Rider: Boda Ride deals 2 damage. Mama Ntilie: healing cards restore 2 health.
+          Street Vendor: draw 3 cards if your hand is empty at turn start. Pickpocket: Mobile Money can steal a random card.
+          Lawyer: Police Checks against you fail. Journalist: Phone Call draws an extra card.
+          Bouncer: Power Cut deals 3 damage. Matatu Conductor: Matatu draws an extra card.
+          Night Guard: starts with 4 health. Makerere Student: starts with 5 cards.
+          MP Hopeful: draw a card after surviving damage. Owino Trader: Mobile Money gives 2 coins.
         </details>
         <details>
           <summary>Cards</summary>
@@ -335,6 +345,22 @@ const ROLE_INFO = {
     description: 'Win alone by personally eliminating 2 players.'
   }
 };
+
+const CHARACTER_INFO = {
+  'Boda Rider': { ability: 'Boda Ride deals 2 damage instead of 1.' },
+  'Mama Ntilie': { ability: 'Traffic Jam and Rainstorm restore 2 health instead of 1.' },
+  'Street Vendor': { ability: 'If your hand is empty at the start of your turn, draw 3 cards.' },
+  'Pickpocket': { ability: 'Mobile Money also lets you take a random card from another player.' },
+  'Lawyer': { ability: 'Police Checks against you fail.' },
+  'Journalist': { ability: 'After playing Phone Call, draw one extra card.' },
+  'Bouncer': { ability: 'Power Cut deals 3 damage instead of 2. You may still only play one card per turn.' },
+  'Matatu Conductor': { ability: 'After playing Matatu, draw one extra card.' },
+  'Night Guard': { ability: 'You start with 4 maximum health instead of 3.' },
+  'Makerere Student': { ability: 'You start with one extra card.' },
+  'MP Hopeful': { ability: 'Whenever you survive damage, draw one card.' },
+  'Owino Trader': { ability: 'Mobile Money gives you 2 coins instead of 1.' }
+};
+const CHARACTER_NAMES = Object.keys(CHARACTER_INFO);
 
 const INDEPENDENTS = ['Hustler', 'Survivor', 'Gossip', 'Bounty Hunter'];
 
@@ -944,6 +970,7 @@ function startNet() {
 
 function setup(n, roster) {
   const roles = assignRoles(n);
+  const characters = shuffle(CHARACTER_NAMES).slice(0, n);
 
   P = roster.map((m, i) => ({
     id: i,
@@ -952,8 +979,9 @@ function setup(n, roster) {
     host: !!m.host,
     human: !!m.human,
     role: roles[i],
-    hp: 3,
-    maxHp: 3,
+    character: characters[i],
+    hp: characters[i] === 'Night Guard' ? 4 : 3,
+    maxHp: characters[i] === 'Night Guard' ? 4 : 3,
     coins: 0,
     kills: 0,
     alive: true,
@@ -969,7 +997,7 @@ function setup(n, roster) {
   gameLog = [];
 
   P.forEach(p => {
-    p.hand = drawCards(4);
+    p.hand = drawCards(p.character === 'Makerere Student' ? 5 : 4);
   });
 
   const chairman = P.find(p => p.role === 'Chairman');
@@ -1066,7 +1094,18 @@ function onAct(player, action) {
   switch (card.type) {
     case 'attack':
       addLog(player.name + ' played ' + cardName + ' against ' + target.name + '.');
-      target.hp -= card.damage;
+      let damage = card.damage;
+      if (player.character === 'Boda Rider' && cardName === 'Boda Ride') damage = 2;
+      if (player.character === 'Bouncer' && cardName === 'Power Cut') damage = 3;
+      if (target.character === 'Lawyer' && cardName === 'Police Check') {
+        addLog('The Police Check against ' + target.name + ' failed because they are a Lawyer.');
+        break;
+      }
+      target.hp -= damage;
+      if (target.hp > 0 && target.character === 'MP Hopeful') {
+        target.hand.push(...drawCards(1));
+        addLog(target.name + ' (MP Hopeful) drew a card after surviving damage.');
+      }
 
       if (target.hp <= 0) {
         eliminate(target, player);
@@ -1076,7 +1115,9 @@ function onAct(player, action) {
       break;
 
     case 'steal':
-      if (target.coins > 0) {
+      if (target.character === 'Lawyer') {
+        addLog('The Police Check against ' + target.name + ' failed because they are a Lawyer.');
+      } else if (target.coins > 0) {
         target.coins--;
         player.coins++;
         addLog(player.name + ' took a coin from ' + target.name + '.');
@@ -1085,13 +1126,20 @@ function onAct(player, action) {
       }
       break;
 
-    case 'coins':
-      player.coins += card.amount;
-      addLog(player.name + ' played ' + cardName + ' and gained ' + card.amount + ' coin(s).');
+    case 'coins': {
+      const amount = cardName === 'Mobile Money' && player.character === 'Owino Trader' ? 2 : card.amount;
+      player.coins += amount;
+      addLog(player.name + ' played ' + cardName + ' and gained ' + amount + ' coin(s).');
+      if (cardName === 'Mobile Money' && player.character === 'Pickpocket' && targetOptionsFor(player).length) {
+        const victim = pick(targetOptionsFor(player).filter(x => x.hand.length));
+        if (victim) { const stolen = victim.hand.splice(Math.floor(Math.random() * victim.hand.length), 1)[0]; player.hand.push(stolen); addLog(player.name + ' (Pickpocket) took a random card from ' + victim.name + '.'); }
+      }
       break;
+    }
 
     case 'heal':
-      player.hp = Math.min(player.maxHp, player.hp + card.amount);
+      const healAmount = player.character === 'Mama Ntilie' ? 2 : card.amount;
+      player.hp = Math.min(player.maxHp, player.hp + healAmount);
       addLog(player.name + ' played ' + cardName + ' and recovered health.');
       break;
 
@@ -1109,6 +1157,8 @@ function onAct(player, action) {
 
       addLog(player.name + ' made a phone call to ' + target.name + '.');
       player.lastPrivateInfo = 'Phone Call: ' + target.name + ' is ' + role + '.';
+      if (player.character === 'Journalist') { player.hand.push(...drawCards(1)); addLog(player.name + ' (Journalist) drew a card after Phone Call.'); }
+      if (player.character === 'Matatu Conductor' && cardName === 'Matatu') { player.hand.push(...drawCards(1)); addLog(player.name + ' (Matatu Conductor) drew a card after Matatu.'); }
 
       if (player.role === 'Gossip') {
         player.knownRoleNames = player.knownRoleNames || [];
@@ -1129,6 +1179,8 @@ function onAct(player, action) {
 
   advanceTurn();
 }
+
+function targetOptionsFor(player) { return P.filter(p => p.alive && p.id !== player.id); }
 
 function eliminate(target, killer) {
   if (!target.alive) return;
@@ -1164,6 +1216,12 @@ function advanceTurn() {
     }
 
     addLog('Round ' + roundNo + ' begins.');
+  }
+
+  const active = currentPlayer();
+  if (active && active.alive && active.character === 'Street Vendor' && active.hand.length === 0) {
+    active.hand.push(...drawCards(3));
+    addLog(active.name + ' (Street Vendor) drew 3 cards with an empty hand.');
   }
 
   if (checkWin()) {
@@ -1412,8 +1470,9 @@ function render(view) {
     ' · Coins ' + self.coins +
     (self.role === 'Bounty Hunter' ? ' · Eliminations ' + self.kills : '');
 
-  $('objective').textContent = ROLE_INFO[self.role]?.description || '';
+  $('objective').textContent = (ROLE_INFO[self.role]?.description || '') + ' Character: ' + self.character + '. ' + (self.characterAbility || '');
   $('handNote').textContent = self.privateInfo || '';
+  $('identity').textContent += ' · Character: ' + self.character;
 
   $('turnMessage').textContent = view.gameOver
     ? 'Game over.'
