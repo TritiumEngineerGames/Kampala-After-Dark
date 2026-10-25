@@ -1,728 +1,1569 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kampala: After Dark</title>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
-:root{--bg:#12101c;--pn:#231e33;--tx:#eee;--mu:#9a96ad;--or:#f2a03d;--gr:#73d980;--rd:#ff6666;--yl:#ffd84d;color-scheme:dark}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif}
-button{font:inherit;color:inherit;cursor:pointer}
-h1{color:var(--or);margin:.2em 0;font-size:2em}
-.wrap{max-width:720px;margin:0 auto;padding:20px}
-.or{color:var(--or)}.rd{color:var(--rd)}.big{font-size:1.9em;letter-spacing:.18em;color:var(--or);font-weight:700}
-.btn{background:#c9731a;border:0;border-radius:8px;padding:10px 18px;font-weight:600}
-.btn:disabled{opacity:.35;cursor:default}
-.ghost{background:var(--pn);border:1px solid #554;border-radius:8px;padding:8px 14px}
-input{font:inherit;padding:6px 8px;background:var(--pn);color:var(--tx);border:1px solid #554;border-radius:6px;width:11em}
-input[type=number]{width:4.5em}
-.box{background:var(--pn);border-radius:10px;padding:14px;margin:12px 0}
-#st{color:var(--rd);min-height:1.4em}
-#mem div{padding:3px 0}
-p{color:#cfcbe0}
-#bar{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:8px 14px;background:#000a;position:sticky;top:0;z-index:2}
-#ban{color:var(--or);font-weight:600}
-.cols{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1.2fr);gap:12px;padding:12px}
-@media(max-width:760px){.cols{grid-template-columns:1fr}}
-h3{margin:0 0 6px;color:var(--mu);font-size:.85em;text-transform:uppercase;letter-spacing:.08em}
-.pr{display:grid;width:100%;text-align:left;position:relative;background:var(--pn);border:2px solid transparent;border-radius:8px;padding:6px 10px 10px;margin-bottom:6px;overflow:hidden}
-.pr small{color:var(--mu)}.pr span{font-size:.9em}
-.pr i{position:absolute;left:0;bottom:0;height:4px;background:#d93}
-.pr.cur{border-color:var(--or)}.pr.tg{border-color:var(--gr)}.pr.dim{opacity:.5}.pr.dead{opacity:.4}.pr.me{background:#2f2848}
-.kk{font-size:.75em;margin-left:6px;padding:1px 6px;background:#0005;border:1px solid #665;border-radius:6px}
-#log{background:#0006;border-radius:8px;padding:10px;height:min(52vh,460px);overflow-y:auto}
-#log div{padding:2px 0;border-bottom:1px solid #fff1}
-#me{margin:0 12px;padding:8px 12px;background:var(--pn);border-radius:8px;font-size:.9em}
-#hand{display:flex;gap:8px;overflow-x:auto;padding:12px;align-items:flex-end;min-height:195px}
-.card{flex:0 0 138px;height:170px;background:var(--c);border:2px solid #0006;border-radius:10px;text-align:left;padding:8px;display:flex;flex-direction:column;gap:6px}
-.card small{opacity:.9;font-size:.8em}.card.sel{transform:translateY(-12px);border-color:#fff}.card.dc{border-color:var(--rd)}
-#ov{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:9}
-#box{background:var(--pn);border:2px solid var(--or);border-radius:12px;padding:20px;max-width:560px;width:92%;text-align:center;max-height:92vh;overflow:auto}
-#box button{margin:8px 6px 0}
-[hidden]{display:none!important}
-#help{position:fixed;inset:0;background:#000b;display:grid;place-items:center;padding:12px;z-index:8}
-#helpbox{background:var(--pn);border:2px solid var(--or);border-radius:12px;padding:18px;width:min(600px,100%);max-height:90vh;overflow:auto}
-.helptop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.helptop h2{color:var(--or);margin:0}
-.helptabs{display:flex;gap:6px;margin:16px 0}
-.helptabs button{flex:1;padding:10px 4px}
-.helptabs button.active{background:#c9731a;border-color:var(--or)}
-.helpitem{padding:10px 4px;border-bottom:1px solid #ffffff18}
-.helpitem b{color:var(--or)}
-.helpitem p{margin:4px 0 0}
-.helpnote{font-size:.85em;color:var(--mu)}
+:root {
+  --bg:#101914; --panel:#1b2921; --panel2:#24362b;
+  --text:#f1f2e9; --muted:#b5c1b5; --green:#8acb91;
+  --red:#e78376; --gold:#f0c66b; --border:#405448;
+}
+* {box-sizing:border-box}
+body {
+  margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;
+}
+header {
+  padding:24px 16px; text-align:center;
+  background:linear-gradient(140deg,#263d2d,#101914);
+  border-bottom:1px solid var(--border);
+}
+h1 {margin:0;font-size:clamp(27px,5vw,40px)}
+header p {margin:5px 0 0;color:var(--muted)}
+main {max-width:900px;margin:auto;padding:18px}
+.panel {
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:14px;padding:18px;margin-bottom:16px;
+}
+h2,h3 {margin-top:0}
+label {display:block;margin:12px 0 5px;color:var(--muted)}
+input,select,button {
+  font:inherit;border-radius:8px;padding:11px;
+}
+input,select {
+  width:100%;color:var(--text);background:#101914;
+  border:1px solid var(--border);
+}
+button {
+  cursor:pointer;background:var(--green);color:#102015;
+  border:0;font-weight:700;
+}
+button.secondary {background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+button.danger {background:#8c3f3b;color:white}
+button:disabled {opacity:.45;cursor:not-allowed}
+.actions {display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.actions button {flex:1}
+.hidden {display:none!important}
+.muted {color:var(--muted)}
+.status {padding:10px;border-radius:8px;background:#101914;overflow-wrap:anywhere}
+.good {color:var(--green)}
+.bad {color:var(--red)}
+.gold {color:var(--gold)}
+#code {
+  font-size:32px;letter-spacing:7px;font-weight:800;
+  color:var(--gold);text-align:center;
+}
+.player-list {display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.player {
+  padding:11px;border-radius:9px;background:var(--panel2);
+  border:1px solid var(--border);
+}
+.player.dead {opacity:.48;text-decoration:line-through}
+.player.current {border-color:var(--gold)}
+.player .meta {font-size:13px;color:var(--muted)}
+.cards {display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px}
+.card {
+  border:1px solid var(--border);border-radius:10px;padding:12px;
+  background:var(--panel2);display:flex;flex-direction:column;gap:6px;
+}
+.card strong {color:var(--gold)}
+.card small {color:var(--muted);flex:1}
+.card button {margin-top:7px}
+.log {
+  max-height:230px;overflow:auto;background:#101914;
+  border-radius:8px;padding:12px;font-size:14px;
+}
+.log div {padding:4px 0;border-bottom:1px solid #28382e}
+.help details {margin:9px 0}
+.help summary {cursor:pointer;color:var(--green);font-weight:700}
+footer {text-align:center;color:var(--muted);padding:18px;font-size:13px}
+@media(max-width:500px) {
+  main {padding:10px}
+  .panel {padding:13px}
+  .actions button {min-width:100%}
+}
 </style>
 </head>
 <body>
+<header>
+  <h1>Kampala: After Dark</h1>
+  <p>A hidden-role game of alliances, deception, and survival</p>
+</header>
 
-<div id="menu" class="wrap">
- <h1>KAMPALA: AFTER DARK</h1>
- <p>A game of hidden roles on the streets of Kampala, inspired by <i>Bang!</i>. One person hosts, friends join from their own devices with a code, and bots fill the empty seats (4–12 players total).</p>
- <div class="box">Your name: <input id="nm" maxlength="14" placeholder="Name"></div>
- <div class="box"><b>Host a game</b><br><br><button class="btn" onclick="hostGame()">Create game</button></div>
- <div class="box"><b>Join a game</b><br><br>Code: <input id="jc" maxlength="5" placeholder="ABCDE" style="text-transform:uppercase;width:6em"> <button class="btn" onclick="joinGame()">Join</button></div>
- <div id="st"></div>
- <p><b>Roles.</b> LC Chairman (public): survive. Residents: protect the Chairman and find the Criminals. Gangsters: eliminate the Chairman. Hustler: collect 6 coins. Gossip: learn 5 players' roles. Bounty Hunter: land the killing blow on 2 players. Survivor: be alive when round 13 begins.</p>
- <p><b>Turn.</b> Draw 2, play cards, discard down to your HP. Mugging has range 2 and is normally limited to one per turn; Shortcut dodges it; Rolex heals.</p>
-</div>
+<main>
+  <section id="menu" class="panel">
+    <h2>Enter the city</h2>
+    <label for="nm">Your player name</label>
+    <input id="nm" maxlength="22" placeholder="Enter your name" autocomplete="nickname">
 
-<div id="lobby" class="wrap" hidden>
- <h1>Lobby</h1>
- <div class="box">Join code<br><span class="big" id="code"></span><br><small id="lnk" style="color:var(--mu);word-break:break-all"></small><br><br><button class="ghost" onclick="copyLink()">Copy invite link</button></div>
- <div class="box"><b>Players here</b><div id="mem"></div></div>
- <div id="hostctl" class="box">Total players, bots fill the rest (4–12): <input id="nt" type="number" min="4" max="12" value="4"><br><br><button class="btn" onclick="startNet()">Start game</button></div>
- <p id="lwait">Waiting for the host to start…</p>
- <div id="st2" style="color:var(--rd)"></div>
- <button class="ghost" onclick="location.href=location.pathname">Leave</button>
-</div>
+    <div class="actions">
+      <button onclick="hostGame()">Host a game</button>
+    </div>
 
-<div id="game" hidden>
- <div id="bar"><span id="info"></span><span id="ban"></span><button class="ghost" onclick="openHelp()">Help ?</button></div>
- <div class="cols">
-  <section><h3>Players, in seating order (neighbours sit next to each other)</h3><div id="pl"></div></section>
-  <section><h3>What has happened</h3><div id="log"></div></section>
- </div>
- <div id="me"></div>
- <div id="hand"></div>
- <div class="wrap" style="padding-top:0"><button class="btn" id="end" onclick="act({k:'end'})">End turn</button></div>
-</div>
+    <label for="jc">Room code</label>
+    <input id="jc" maxlength="5" placeholder="ABCDE" autocomplete="off"
+           style="text-transform:uppercase">
 
-<div id="help" hidden>
- <div id="helpbox">
-  <div class="helptop"><h2>Game Help</h2><button class="ghost" onclick="closeHelp()">Close ✕</button></div>
-  <div class="helptabs">
-   <button class="ghost active" data-tab="roles" onclick="helpTab('roles')">Roles</button>
-   <button class="ghost" data-tab="chars" onclick="helpTab('chars')">Characters</button>
-   <button class="ghost" data-tab="cards" onclick="helpTab('cards')">Cards</button>
-  </div>
-  <div id="helpcontent"></div>
-  <p class="helpnote">Help does not pause the game. Close this window to return to play.</p>
- </div>
-</div>
+    <div class="actions">
+      <button onclick="joinGame()">Join a game</button>
+    </div>
 
-<div id="ov" hidden><div id="box"></div></div>
+    <p id="st" class="status muted" role="status">Ready to play.</p>
+    <p class="muted">
+      Multiplayer uses PeerJS and WebRTC. Each player needs an internet
+      connection and their own browser tab or device.
+    </p>
+  </section>
 
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <section id="lobby" class="hidden">
+    <div class="panel">
+      <h2>Waiting for players</h2>
+      <p class="muted">Share this room code with everyone joining your game.</p>
+      <div id="code"></div>
+      <label>Shareable link</label>
+      <input id="lnk" readonly>
+      <div class="actions">
+        <button class="secondary" onclick="copyLink()">Copy invite link</button>
+        <button class="secondary" onclick="copyCode()">Copy room code</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Players in the lobby</h3>
+      <div id="mem" class="player-list"></div>
+      <div id="hostctl" class="hidden">
+        <label for="nt">Total game size, including bots</label>
+        <select id="nt">
+          <option value="4">4 players</option>
+          <option value="5">5 players</option>
+          <option value="6">6 players</option>
+          <option value="7">7 players</option>
+          <option value="8">8 players</option>
+          <option value="9">9 players</option>
+          <option value="10">10 players</option>
+          <option value="11">11 players</option>
+          <option value="12">12 players</option>
+        </select>
+        <div class="actions">
+          <button onclick="startNet()">Start game</button>
+        </div>
+        <p class="muted">Bots fill any empty seats up to your selected player count.</p>
+      </div>
+      <p id="lwait" class="muted">Waiting for the host to start the game.</p>
+      <p id="st2" class="status muted" role="status"></p>
+    </div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="panel">
+      <h2 id="roundTitle">Round 1</h2>
+      <p id="identity" class="status"></p>
+      <p id="objective" class="muted"></p>
+      <p id="turnMessage" class="status"></p>
+    </div>
+
+    <div class="panel">
+      <h3>Players</h3>
+      <div id="players" class="player-list"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Your cards</h3>
+      <div id="hand" class="cards"></div>
+      <p id="handNote" class="muted"></p>
+    </div>
+
+    <div class="panel">
+      <h3>Game actions</h3>
+      <label for="target">Target player, if required</label>
+      <select id="target"></select>
+      <div class="actions">
+        <button id="passBtn" class="secondary" onclick="sendAction({kind:'pass'})">
+          Pass turn
+        </button>
+      </div>
+      <p class="muted">You may play one card or pass when it is your turn.</p>
+    </div>
+
+    <div class="panel">
+      <h3>City news</h3>
+      <div id="log" class="log"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Help and roles</h3>
+      <div class="help">
+        <details>
+          <summary>Community</summary>
+          The Chairman and Residents try to eliminate the Criminal Network.
+          The Informant belongs to the Community but has incomplete information
+          about other players.
+        </details>
+        <details>
+          <summary>Criminal Network</summary>
+          Gangsters and the Insider work toward the Criminal Network's victory.
+          The Insider has incomplete information about the Community.
+        </details>
+        <details>
+          <summary>Independent roles</summary>
+          Hustler: collect 6 coins. Survivor: remain alive through the end of
+          round 12. Gossip: learn 5 distinct roles while alive. Bounty Hunter:
+          personally eliminate 2 players.
+        </details>
+        <details>
+          <summary>Cards</summary>
+          <b>Boda Ride:</b> attack a player for 1 damage.<br>
+          <b>Matatu:</b> attack a player for 1 damage.<br>
+          <b>Power Cut:</b> attack a player for 2 damage.<br>
+          <b>Police Check:</b> take 1 coin from a target, if possible.<br>
+          <b>Mobile Money:</b> gain 1 coin.<br>
+          <b>Traffic Jam:</b> heal yourself for 1 health.<br>
+          <b>Rainstorm:</b> heal yourself for 1 health.<br>
+          <b>Phone Call:</b> privately learn a target's role.<br>
+          <b>Shortcut:</b> gain 2 coins.
+        </details>
+        <details>
+          <summary>How victory works</summary>
+          If the Chairman dies, the Criminal Network wins immediately, unless
+          the only remaining living player is an Independent. Independents can
+          also win by achieving their own objectives. If no Criminal Network
+          or Independent remains, the Community wins.
+        </details>
+      </div>
+    </div>
+
+    <div id="endPanel" class="panel hidden">
+      <h2 id="endTitle">Game over</h2>
+      <p id="endText"></p>
+      <button onclick="backToMenu()">Return to menu</button>
+    </div>
+  </section>
+</main>
+
+<footer>Kampala: After Dark · A social deduction game</footer>
+
 <script>
-const $=i=>document.getElementById(i),sl=ms=>new Promise(r=>setTimeout(r,ms)),rnd=n=>Math.floor(Math.random()*n);
-const sh=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
-const pick=a=>a.length?a[rnd(a.length)]:null;
-const fac=r=>['Chairman','Resident','Informant'].includes(r)?'Community':['Gangster','Insider'].includes(r)?'Criminal Network':'Independent';
-const FC={Community:'var(--gr)','Criminal Network':'var(--rd)',Independent:'var(--yl)'};
+'use strict';
 
-const RD={
- Chairman:'Public community leader. Survive and expose the Criminal Network.',
- Resident:'Protect the Chairman and find the Criminals.',
- Gangster:'Eliminate the LC Chairman. Blend in with the Community.',
- Hustler:'Win alone by collecting 6 coins (Mobile Money).',
- Survivor:'Win alone by being alive when round 13 begins.',
- Informant:'Community. You know the Chairman and see the other Community players mixed with the Insider. You cannot tell which listed player is the Insider.',
- Insider:'Criminal Network. You know the Chairman and see the Gangsters mixed with the Informant. You cannot tell which listed player is the Informant.',
- Gossip:'Win alone by learning 5 players’ roles through Police Check or Phone Call.',
- 'Bounty Hunter':'Win alone by landing the killing blow on 2 players.'
+/* =========================================================
+   CONFIGURATION
+   ========================================================= */
+
+const MAX_PLAYERS = 12;
+const MIN_PLAYERS = 4;
+const SPECIAL_MIN = 8;
+const MAX_ROUNDS = 12;
+const ROOM_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+const CARD_DEFS = {
+  'Boda Ride': {
+    description: 'Deal 1 damage to a target.',
+    type: 'attack', damage: 1, target: true
+  },
+  'Matatu': {
+    description: 'Deal 1 damage to a target.',
+    type: 'attack', damage: 1, target: true
+  },
+  'Power Cut': {
+    description: 'Deal 2 damage to a target.',
+    type: 'attack', damage: 2, target: true
+  },
+  'Police Check': {
+    description: 'Take 1 coin from a target.',
+    type: 'steal', target: true
+  },
+  'Mobile Money': {
+    description: 'Gain 1 coin.',
+    type: 'coins', amount: 1
+  },
+  'Traffic Jam': {
+    description: 'Recover 1 health.',
+    type: 'heal', amount: 1
+  },
+  'Rainstorm': {
+    description: 'Recover 1 health.',
+    type: 'heal', amount: 1
+  },
+  'Phone Call': {
+    description: 'Privately learn a target’s role.',
+    type: 'inspect', target: true
+  },
+  'Shortcut': {
+    description: 'Gain 2 coins.',
+    type: 'coins', amount: 2
+  }
 };
 
-const MAXR=12,GOAL=6,GOSSIP=5,SPECIAL_MIN=8;
-const INDEP=['Hustler','Survivor','Gossip','Bounty Hunter'];
-const [M,SC,RO,BO,PC,PO,MM,TJ,RA,MA,PH,KT]=[...Array(12).keys()];
-const CT=[
- ['Mugging','Hit a player within range 2 for 1 damage. One per turn.',22,1],
- ['Shortcut','Reaction: cancel a Mugging aimed at you.',12,0],
- ['Rolex','Heal 1 HP.',8,0],
- ['Boda Ride','Move any player (even you) 2 seats around the table.',6,1],
- ['Power Cut','Cancel a player’s ability until their turn ends.',5,1],
- ['Police Check','Secretly learn a player’s role.',5,1],
- ['Mobile Money','Swap a random card with a player. Both gain 1 coin.',6,1],
- ['Traffic Jam','Target player skips their next turn.',4,1],
- ['Rainstorm','Everyone discards a card.',3,0],
- ['Matatu','Shuffle the seats of 3 random players.',3,0],
- ['Phone Call','Privately swap role info with a player.',4,1],
- ['Kampala Traffic','Randomly reshuffle the turn order.',3,0]
-];
-const COL=['#9e2e2e','#335aa6','#338f4d','#bf731f','#737333','#4d4d99','#998019','#8c4073','#408c8c','#b35980','#598073','#80664d'];
-const CH=[
- ['Boda Rider','range','Mugging range +1.'],
- ['Mama Ntilie','heal','Rolex heals 2 HP.'],
- ['Street Vendor','vend','Draw 3 if your hand is empty at turn start.'],
- ['Pickpocket','pick','Mobile Money: take a card without giving one.'],
- ['Lawyer','law','Police Checks on you fail.'],
- ['Journalist','jour','Draw a card when you play Phone Call.'],
- ['Bouncer','enf','Any number of Muggings per turn.'],
- ['Matatu Conductor','cond','Draw a card when you play Matatu.'],
- ['Night Guard','guard','+1 max HP.'],
- ['Makerere Student','stu','First draw each turn comes from the discard pile.'],
- ['MP Hopeful','pol','Draw a card whenever you survive damage.'],
- ['Owino Trader','trade','Mobile Money gives you 2 coins instead of 1.']
-];
-const NAMES=['Mukasa','Nakato','Okello','Atim','Kato','Namatovu','Ssemakula','Achieng','Byaruhanga','Nambi','Opio','Tumusiime','Akello','Wasswa'];
+const ROLE_INFO = {
+  Chairman: {
+    faction: 'Community',
+    description: 'A public leader. Your death immediately triggers a Criminal Network victory, subject to the Independent exception.'
+  },
+  Resident: {
+    faction: 'Community',
+    description: 'Work with the Community to eliminate the Criminal Network.'
+  },
+  Gangster: {
+    faction: 'Criminal Network',
+    description: 'Work with the Criminal Network to eliminate your opponents.'
+  },
+  Hustler: {
+    faction: 'Independent',
+    description: 'Win alone by reaching 6 coins.'
+  },
+  Survivor: {
+    faction: 'Independent',
+    description: 'Win alone if you are alive at the end of round 12.'
+  },
+  Informant: {
+    faction: 'Community',
+    description: 'You know the Chairman. You cannot distinguish the Insider from Community members in your partial information.'
+  },
+  Insider: {
+    faction: 'Criminal Network',
+    description: 'You know the Chairman. You cannot distinguish the Informant from Gangsters in your partial information.'
+  },
+  Gossip: {
+    faction: 'Independent',
+    description: 'Win alone by learning 5 distinct roles while alive.'
+  },
+  'Bounty Hunter': {
+    faction: 'Independent',
+    description: 'Win alone by personally eliminating 2 players.'
+  }
+};
 
-const HELP_ROLES=[
- ['LC Chairman','Community','Survive. The Chairman is publicly identified at the start.'],
- ['Resident','Community','Protect the Chairman and find the Criminals. The Community wins when the Criminal Network and all Independent roles are gone.'],
- ['Gangster','Criminal Network','Eliminate the LC Chairman. If the Chairman falls, the Criminal Network takes over Kampala.'],
- ['Hustler','Independent','Win alone by collecting 6 coins through Mobile Money.'],
- ['Survivor','Independent','Win alone by remaining alive when round 13 begins.'],
- ['Informant','Community','Needs 8+ players. Knows the publicly identified Chairman. Sees the other Community players mixed with the Insider, but cannot tell which listed player is the Insider.'],
- ['Insider','Criminal Network','Needs 8+ players. Knows the publicly identified Chairman. Sees the Gangsters mixed with the Informant, but cannot tell which listed player is the Informant.'],
- ['Gossip','Independent','Win alone while alive after learning 5 players’ roles through Police Check or Phone Call. Not available in a four-player game.'],
- ['Bounty Hunter','Independent','Win alone by landing the killing blow on 2 players.']
-];
+const INDEPENDENTS = ['Hustler', 'Survivor', 'Gossip', 'Bounty Hunter'];
 
-function helpTab(tab){
- document.querySelectorAll('.helptabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
- let items=[];
- if(tab==='roles')items=HELP_ROLES.map(([name,team,desc])=>({name,desc,team}));
- if(tab==='chars')items=CH.map(ch=>({name:ch[0],desc:ch[2]}));
- if(tab==='cards')items=CT.map((card,i)=>({name:card[0],desc:helpCardDescription(i)}));
- $('helpcontent').innerHTML=items.map(x=>`<div class="helpitem"><b>${x.name}${x.team?` · ${x.team}`:''}</b><p>${x.desc}</p></div>`).join('');
-}
-function helpCardDescription(i){
- return [
-  'Play on a player within your Mugging range to deal 1 damage. Normally limited to one Mugging per turn. Boda Rider increases range; Bouncer removes the per-turn limit.',
-  'Reaction card. When someone mugs you, play Shortcut to cancel that Mugging and avoid its damage.',
-  'Restore 1 HP, up to your maximum HP. Mama Ntilie restores 2 HP instead.',
-  'Move any player, including yourself, two seats around the table.',
-  'Disable the target player’s character ability until their turn ends.',
-  'Privately reveal the target player’s role to yourself. A Lawyer cannot be successfully checked.',
-  'Take a random card from the target and give them one of your cards at random. Both players gain coins; Owino Trader gains 2 coins instead of 1, and Pickpocket does not give a card back.',
-  'The target skips their next turn.',
-  'Each player with cards must discard one card. Human players choose which card to discard.',
-  'Shuffle the seats of three randomly selected players. Matatu Conductor draws a card when playing this.',
-  'You and the target privately learn each other’s roles. Journalist draws an additional card when playing Phone Call.',
-  'Randomly reshuffle the turn order.'
- ][i];
-}
-function openHelp(){if($('game').hidden)return;helpTab('roles');$('help').hidden=false}
-function closeHelp(){$('help').hidden=true}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp()});
+/* =========================================================
+   NETWORK AND GAME STATE
+   ========================================================= */
 
-let P=[],seats=[],order=[],ptr=0,deck=[],disc=[],log=[],round=1,over=0,wt='',winners=[],cur=null,waitOn=null,sel=null,idle='',prompts={},hostP=null,finInfo=null;
-let phase='menu',peer=null,conn=null,isHost=false,members=[],CODE='',myName='';
-const has=(p,k)=>p.ch[1]===k&&!p.cut,first=p=>p.name.split(' ')[0],rng=p=>2+(has(p,'range')?1:0);
-const kr=(v,o)=>(v&&v===o)||o.rev||!o.alive?o.role:(v&&v.known[o.i])||null;
-function dist(a,b){const n=seats.length,d=Math.abs(seats.indexOf(a)-seats.indexOf(b));return Math.min(d,n-d)}
-function rm(p,c){p.hand=p.hand.filter(x=>x!==c)}
-function L(t,o){log.push({t,o});push()}
-const clean=s=>String(s||'').replace(/[^\p{L}\p{N} _.'’-]/gu,'').trim().slice(0,14)||'Player';
+let peer = null;
+let conn = null;
+let isHost = false;
+let CODE = '';
+let myName = '';
+let phase = 'menu';
 
-function poolTxt(h){
- if(!h.pool)return '';
- const inf=h.role==='Informant';
- const names=[...h.pool].filter(i=>i!==h.i).map(i=>P[i].name).join(', ');
- return `<br><br><b>Your private information list:</b> ${names}.<br>${
-  inf
-   ? 'These players are other Community members mixed with the Insider.'
-   : 'These players are Gangsters mixed with the Informant.'
- } You cannot tell which listed player is the hidden opposing role.`;
+let members = [];
+let P = [];
+let hostP = null;
+let turnIndex = 0;
+let roundNo = 1;
+let gameOver = false;
+let gameLog = [];
+let knownRoles = new Set();
+let connectionTimer = null;
+let peerGeneration = 0;
+
+/* =========================================================
+   GENERAL UTILITIES
+   ========================================================= */
+
+const $ = id => document.getElementById(id);
+
+function cleanName(value) {
+  return String(value || '')
+    .replace(/[<>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 22);
 }
 
-// ================= networking =================
-function show(id){['menu','lobby','game'].forEach(x=>$(x).hidden=x!=id)}
-function status(m){$('st').textContent=m;$('st2').textContent=m}
-function needPeer(){if(typeof Peer=='undefined'){status('Could not load the PeerJS library. Check your internet connection.');return 0}return 1}
-function hostGame(){if(!needPeer())return;isHost=true;myName=clean($('nm').value);tryHost()}
-function tryHost(){
- const code=Array.from({length:5},()=>'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[rnd(31)]).join('');
- peer=new Peer('kampala-'+code);
- peer.on('open',()=>{CODE=code;members=[{name:myName,conn:null}];phase='lobby';lobbyPush()});
- peer.on('error',e=>{if(e.type=='unavailable-id')tryHost();else status('Network error: '+e.type)});
- peer.on('connection',c=>{c.on('data',d=>hostData(c,d));c.on('close',()=>drop(c))});
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
-function joinGame(){
- if(!needPeer())return;
- myName=clean($('nm').value);
- const code=$('jc').value.trim().toUpperCase();
- if(code.length!=5)return status('Enter the 5-character code.');
- status('Connecting…');peer=new Peer();
- peer.on('open',()=>{
-  conn=peer.connect('kampala-'+code,{reliable:true});
-  conn.on('open',()=>{status('');conn.send({t:'join',name:myName})});
-  conn.on('data',cdata);
-  conn.on('close',()=>{status('Disconnected from the host.');if(phase=='game')$('ban').textContent='Disconnected from the host.'});
- });
- peer.on('error',e=>status(e.type=='peer-unavailable'?'No game found with that code.':'Network error: '+e.type));
-}
-function hostData(c,d){
- if(!d||typeof d!='object')return;
- if(d.t=='join'){
-  if(members.some(m=>m.conn===c))return;
-  if(phase!='lobby'||members.length>=12){c.send({t:'err',m:phase!='lobby'?'That game has already started.':'That game is full.'});return setTimeout(()=>c.close(),400)}
-  members.push({name:clean(d.name),conn:c});lobbyPush();
- }else if(d.t=='act'){const p=P.find(x=>x.conn===c);if(p&&phase=='game')onAct(p,d.a)}
-}
-function drop(c){
- if(phase=='lobby'){members=members.filter(m=>m.conn!==c);lobbyPush()}
- else{const p=P.find(x=>x.conn===c);if(p)abandon(p)}
-}
-function cdata(d){
- if(!d)return;
- if(d.t=='lobby'){phase='lobby';showLobby(d.names,d.code)}
- else if(d.t=='view'){if(phase!='game'){phase='game';show('game')}render(d.v)}
- else if(d.t=='err')status(d.m);
-}
-function lobbyPush(){
- const names=members.map(m=>m.name);
- members.forEach(m=>{if(m.conn&&m.conn.open)m.conn.send({t:'lobby',names,code:CODE})});
- showLobby(names,CODE);
-}
-function showLobby(names,code){
- show('lobby');$('code').textContent=code;
- $('lnk').textContent=location.origin+location.pathname+'?join='+code;
- $('mem').innerHTML=names.map((n,i)=>`<div>${n}${i==0?' <span class="or">(host)</span>':''}</div>`).join('');
- $('hostctl').hidden=!isHost;$('lwait').hidden=isHost;
-}
-function copyLink(){const t=$('lnk').textContent;navigator.clipboard&&navigator.clipboard.writeText(t)}
-function act(a){if(isHost)onAct(hostP,a);else if(conn&&conn.open)conn.send({t:'act',a})}
 
-let pend=0;
-function push(){
- if(pend||!hostP)return;
- pend=1;
- setTimeout(()=>{
-  pend=0;
-  P.forEach(p=>{
-   if(!p.human)return;
-   const v=view(p);
-   if(p===hostP)render(v);
-   else if(p.conn&&p.conn.open)p.conn.send({t:'view',v});
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function makeCode() {
+  let out = '';
+  for (let i = 0; i < 5; i++) {
+    out += ROOM_CHARS[Math.floor(Math.random() * ROOM_CHARS.length)];
+  }
+  return out;
+}
+
+function show(id) {
+  ['menu', 'lobby', 'game'].forEach(section => {
+    $(section).classList.toggle('hidden', section !== id);
   });
- },30);
 }
 
-// ================= game setup (host) =================
-function BR(n){
- // Four-player games always have exactly one Chairman, Resident,
- // Gangster, and one simple Independent. Gossip is excluded.
- if(n===4){
-  return sh(['Chairman','Resident','Gangster',pick(['Hustler','Survivor'])]);
- }
-
- // Criminal counts scale with the table, without overwhelming the Community.
- const cr=n<=5?1:n<=10?2:3;
- const independentCount=n<=9?1:2;
- const roles=['Chairman',...Array(cr).fill('Gangster')];
-
- // Keep the special information roles for games with at least 8 players.
- if(n>=SPECIAL_MIN)roles.push('Informant','Insider');
-
- roles.push(...sh([...INDEP]).slice(0,independentCount));
-
- while(roles.length<n)roles.push('Resident');
- return sh(roles);
+function status(message) {
+  $('st').textContent = message;
+  $('st2').textContent = message;
 }
-function draw(p,k=1){
- while(k--){
-  if(!deck.length){
-   if(!disc.length)return;
-   deck=sh(disc);disc=[];
-   L('The deck is reshuffled.');
+
+function setStatusClass(el, cls) {
+  el.classList.remove('good', 'bad', 'gold');
+  if (cls) el.classList.add(cls);
+}
+
+function needPeer() {
+  if (typeof Peer === 'undefined') {
+    status('PeerJS did not load. Check your internet connection and reload the page.');
+    return false;
   }
-  p.hand.push(deck.pop());
- }
+  return true;
 }
-function setup(n,mem){
- P=[];log=[];deck=[];disc=[];over=0;round=1;cur=null;waitOn=null;sel=null;idle='';prompts={};finInfo=null;hostP=null;
- const roles=BR(n),chars=sh([...CH]),bots=sh([...NAMES]);
- for(let i=0;i<n;i++){
-  const ch=chars[i],r=roles[i],max=4+(ch[1]=='guard'?1:0)+(r=='Chairman'?1:0),m=mem[i];
-  P.push({
-   i,name:m?m.name:bots.pop(),human:!!m,conn:m?m.conn:null,role:r,ch,
-   hp:max,max,coins:0,alive:true,skip:0,cut:0,rev:r=='Chairman',
-   hand:[],known:{},sus:{},mug:0,kills:0,toast:''
+
+function clearConnectionTimer() {
+  if (connectionTimer) {
+    clearTimeout(connectionTimer);
+    connectionTimer = null;
+  }
+}
+
+function destroyPeer() {
+  clearConnectionTimer();
+
+  try {
+    if (conn) conn.close();
+  } catch (_) {}
+
+  try {
+    if (peer && !peer.destroyed) peer.destroy();
+  } catch (_) {}
+
+  conn = null;
+  peer = null;
+}
+
+function sendToHost(data) {
+  if (!conn || !conn.open) {
+    status('Not connected to the host. Rejoin the room.');
+    return false;
+  }
+
+  try {
+    conn.send(data);
+    return true;
+  } catch (err) {
+    status('Could not send the action: ' + err.message);
+    return false;
+  }
+}
+
+/* =========================================================
+   HOSTING AND JOINING
+   ========================================================= */
+
+function hostGame() {
+  if (!needPeer()) return;
+
+  myName = cleanName($('nm').value);
+  if (!myName) {
+    status('Enter your name first.');
+    return;
+  }
+
+  destroyPeer();
+  isHost = true;
+  members = [];
+  phase = 'connecting';
+  show('menu');
+  status('Creating a room…');
+  tryHost();
+}
+
+function tryHost() {
+  if (!needPeer()) return;
+
+  const myGeneration = ++peerGeneration;
+  CODE = makeCode();
+
+  try {
+    peer = new Peer('kampala-' + CODE, {
+      debug: 1
+    });
+  } catch (err) {
+    status('Could not create room: ' + err.message);
+    return;
+  }
+
+  peer.on('open', id => {
+    if (myGeneration !== peerGeneration) return;
+
+    members = [{
+      name: myName,
+      conn: null,
+      host: true
+    }];
+
+    phase = 'lobby';
+    status('Room created successfully. Waiting for other players.');
+    lobbyPush();
   });
- }
- hostP=P.find(x=>x.human&&!x.conn);
- seats=sh([...P]);order=[...seats];ptr=order.indexOf(P.find(x=>x.role=='Chairman'));
 
- // Informant sees other Community members mixed with the Insider.
- // Insider sees Gangsters mixed with the Informant.
- const chairman=P.find(x=>x.role==='Chairman');
- const ifm=P.find(x=>x.role==='Informant');
- const ins=P.find(x=>x.role==='Insider');
- if(ifm&&ins){
-  ifm.pool=new Set(P.filter(x=>
-   x!==chairman&&(fac(x.role)==='Community'||x===ins)
-  ).map(x=>x.i));
-  ins.pool=new Set(P.filter(x=>
-   x!==chairman&&(x.role==='Gangster'||x===ifm)
-  ).map(x=>x.i));
- }
+  peer.on('connection', incoming => {
+    if (myGeneration !== peerGeneration) {
+      incoming.close();
+      return;
+    }
 
- let id=0;
- CT.forEach((c,t)=>{for(let k=0;k<c[2];k++)deck.push({t,id:id++})});
- sh(deck);
- P.forEach(p=>draw(p,4));
-}
-function startNet(){
- const H=members.length;
- const requested=parseInt($('nt').value,10)||4;
- const n=Math.min(12,Math.max(4,H,requested));
- const mem=sh([...members.filter(m=>!m.conn||m.conn.open)]);
- const seen={};
- mem.forEach(m=>{const k=m.name.toLowerCase();seen[k]=(seen[k]||0)+1;if(seen[k]>1)m.name+=' '+seen[k]});
- setup(n,mem);phase='game';show('game');run();
-}
-function toLobby(){
- phase='lobby';P=[];hostP=null;prompts={};waitOn=null;$('ov').hidden=true;
- members=members.filter(m=>!m.conn||m.conn.open);lobbyPush();
-}
+    configureIncomingConnection(incoming);
+  });
 
-// ================= host input handling =================
-function waitFor(p,mode,msg){
- return new Promise(r=>{waitOn={p,mode,msg,res:r};sel=null;push()});
-}
-function fire(v){
- const w=waitOn;waitOn=null;sel=null;
- if(w){w.p.toast='';w.res(v)}
-}
-function ask(p,html,opts=['OK']){
- if(!p.human)return Promise.resolve(0);
- return new Promise(r=>{
-  prompts[p.i]={html,opts,res:v=>{idle='';r(v)}};
-  idle=`Waiting for ${p.name}…`;push();
- });
-}
-function abandon(p){
- if(!p.human)return;
- p.human=false;L(`<b>${p.name}</b> has left — a bot takes over.`);
- const q=prompts[p.i];
- if(q){delete prompts[p.i];q.res(0)}
- if(waitOn&&waitOn.p===p){const w=waitOn;fire(w.mode=='play'?'end':botDisc(p))}
- if(p.conn){try{p.conn.close()}catch(e){}}
-}
-function onAct(p,a){
- if(!a||typeof a!='object')return;
- if(a.k=='bot'){const t=P[+a.i];if(p===hostP&&t&&t!==hostP&&t.human)abandon(t);return}
- if(a.k=='ask'){
-  const q=prompts[p.i];
-  if(q){delete prompts[p.i];q.res(Math.min(q.opts.length-1,Math.max(0,+a.i|0)));push()}
-  return;
- }
- const w=waitOn;if(!w||w.p!==p)return;
- if(a.k=='end'&&w.mode=='play')return fire('end');
- if(a.k=='card'){
-  const c=p.hand.find(x=>x.id===a.id);if(!c)return;
-  if(w.mode=='discard')return fire(c);
-  if(w.mode!='play')return;
-  if(CT[c.t][3]){sel=sel===c?null:c;p.toast=sel?`Choose a target for ${CT[c.t][0]}.`:'';return push()}
-  const m=okN(p,c);if(m){p.toast=m;return push()}
-  fire({c,t:null});
- }
- if(a.k=='tgt'&&w.mode=='play'&&sel){
-  const t=P[+a.i],m=ok(p,sel,t);
-  if(m){p.toast=m;return push()}
-  fire({c:sel,t});
- }
+  peer.on('error', err => {
+    if (myGeneration !== peerGeneration) return;
+
+    console.error('[Host PeerJS error]', err.type, err);
+
+    if (err.type === 'unavailable-id') {
+      status('Room code collision. Generating a new code…');
+      try {
+        if (peer && !peer.destroyed) peer.destroy();
+      } catch (_) {}
+      setTimeout(() => {
+        if (isHost && phase === 'connecting') tryHost();
+      }, 200);
+      return;
+    }
+
+    status('Host connection error: ' + err.type +
+      '. Check the browser console for details.');
+  });
+
+  peer.on('disconnected', () => {
+    if (myGeneration === peerGeneration) {
+      status('Host disconnected from PeerJS signaling. Attempting to reconnect…');
+      try {
+        peer.reconnect();
+      } catch (_) {}
+    }
+  });
+
+  peer.on('close', () => {
+    if (myGeneration === peerGeneration && phase !== 'menu') {
+      status('The host peer connection closed.');
+    }
+  });
 }
 
-// ================= rules =================
-function ok(a,c,t){
- if(!t||!t.alive)return'Invalid target.';
- if(c.t!=BO&&t===a)return'You can’t target yourself with that.';
- if(c.t==M){
-  if(a.mug&&!has(a,'enf'))return'Only one Mugging per turn.';
-  const d=dist(a,t);if(d>rng(a))return`${t.name} is too far (distance ${d}, range ${rng(a)}). Try a Boda Ride.`;
- }
- if(c.t==PC&&t.cut)return'Already without power.';
- if(c.t==MM&&!t.hand.length)return`${t.name} has no cards.`;
- if(c.t==TJ&&t.skip)return'Already stuck in traffic.';
- return'';
+function configureIncomingConnection(c) {
+  console.log('[Host] Incoming connection from:', c.peer);
+
+  c.on('open', () => {
+    console.log('[Host] Data connection opened:', c.peer);
+  });
+
+  c.on('data', data => {
+    console.log('[Host] Received message:', data);
+    hostData(c, data);
+  });
+
+  c.on('error', err => {
+    console.error('[Host] Connection error:', err);
+  });
+
+  c.on('close', () => {
+    console.log('[Host] Connection closed:', c.peer);
+    dropConnection(c);
+  });
 }
-function okN(a,c){
- if(c.t==RO&&a.hp>=a.max)return'You’re already at full health.';
- if(c.t==MA&&seats.length<3)return'Matatu needs 3+ players.';
- if(c.t==SC)return'Shortcut is a reaction: it’s offered when you are mugged.';
- return'';
-}
-async function play(p,c,t){
- rm(p,c);disc.push(c);
- L(`<b>${p.name}</b> plays <span class="or">${CT[c.t][0]}</span>${t?(t===p?' on themselves':` on <b>${t.name}</b>`):''}`);
- await sl(400);
- switch(c.t){
-  case M:await mug(p,t);break;
-  case RO:p.hp=Math.min(p.max,p.hp+(has(p,'heal')?2:1));L(`${p.name} enjoys a Rolex and heals (HP ${p.hp}).`);break;
-  case BO:{
-   const i=seats.indexOf(t);seats.splice(i,1);seats.splice((i+2)%(seats.length+1),0,t);
-   L(`${t.name} zips 2 seats along the table.`);break;
+
+function joinGame() {
+  if (!needPeer()) return;
+
+  myName = cleanName($('nm').value);
+  const code = $('jc').value.trim().toUpperCase();
+
+  if (!myName) {
+    status('Enter your name first.');
+    return;
   }
-  case PC:t.cut=1;L(`Lights out! ${t.name} loses the ${t.ch[0]} ability.`);break;
-  case PO:await police(p,t);break;
-  case MM:mm(p,t);break;
-  case TJ:t.skip=1;L(`${t.name} will skip their next turn.`);break;
-  case RA:await rain(p);break;
-  case MA:matatu(p);break;
-  case PH:await phone(p,t);break;
-  case KT:traffic(p);break;
- }
- win();push();
-}
-async function mug(p,t){
- p.mug=1;t.sus[p.i]=(t.sus[p.i]||0)+2;
- if(t.role=='Chairman')P.forEach(b=>{if(b!==p&&b.alive&&!b.human&&fac(b.role)=='Community')b.sus[p.i]=(b.sus[p.i]||0)+3});
- const sc=t.hand.find(c=>c.t==SC);let d;
- if(t.human){
-  if(sc)d=(await ask(t,`<b>${p.name}</b> is mugging you! Play a Shortcut?`,['Play Shortcut','Take the hit']))==0;
-  else{await ask(t,`<b>${p.name}</b> mugs you and you have no Shortcut!`,['Ouch']);d=false}
- }else d=!!sc;
- if(d&&sc.on!==0&&t.hand.includes(sc)){rm(t,sc);disc.push(sc);L(`${t.name} takes a Shortcut and escapes!`)}
- else await dmg(t,1,p);
-}
-async function dmg(t,a,src){
- t.hp-=a;L(`${t.name} takes ${a} damage (HP ${Math.max(0,t.hp)}/${t.max}).`);
- if(t.hp>0){if(has(t,'pol')){draw(t);L(`${t.name} (MP Hopeful) draws a card.`)}}
- else elim(t,src);
- push();await sl(300);
-}
-function elim(t,src){
- t.alive=false;t.rev=true;t.hp=0;
- seats.splice(seats.indexOf(t),1);disc.push(...t.hand);t.hand=[];
- L(`<b class="rd">${t.name} is out! They were the ${t.role}.</b>`);
- if(src&&src.alive){
-  if(src.role==='Bounty Hunter')src.kills++;
-  if(fac(t.role)=='Criminal Network'){draw(src,2);L(`${src.name} is rewarded with 2 cards.`)}
-  else if(src.role=='Chairman'&&fac(t.role)=='Community'){
-   disc.push(...src.hand);src.hand=[];L('The Chairman harmed a Resident and loses all cards!');
+
+  if (!/^[A-Z2-9]{5}$/.test(code)) {
+    status('Enter the 5-character room code.');
+    return;
   }
- }
- win();
-}
-async function police(p,t){
- if(has(t,'law')){
-  if(p.human)await ask(p,`${t.name} is a Lawyer and refuses to be questioned.`);
-  else L('The Lawyer refuses the check.');
-  return;
- }
- p.known[t.i]=t.role;
- if(p.human)await ask(p,`Police Check: <b>${t.name}</b> is the <b>${t.role}</b> (${fac(t.role)}).`);
-}
-async function phone(p,t){
- p.known[t.i]=t.role;t.known[p.i]=p.role;
- if(has(p,'jour')){draw(p);L(`${p.name} (Journalist) draws a card.`)}
- if(p.human)await ask(p,`You compare notes with <b>${t.name}</b>.<br>They are the <b>${t.role}</b>.<br>They now know you are the ${p.role}.`);
- if(t.human)await ask(t,`<b>${p.name}</b> calls you privately.<br>They are the <b>${p.role}</b>.<br>They now know you are the ${t.role}.`);
-}
-function mm(p,t){
- const tk=t.hand.splice(rnd(t.hand.length),1)[0];p.hand.push(tk);let g=null;
- if(!has(p,'pick')){
-  const o=p.hand.filter(x=>x!==tk);
-  if(o.length){g=o[rnd(o.length)];rm(p,g);t.hand.push(g)}
- }
- p.coins+=has(p,'trade')?2:1;t.coins++;
- L(`${p.name} and ${t.name} trade cards via Mobile Money (+coins).`);
- if(p.human)L(`<i>You received ${CT[tk.t][0]}${g?`, gave ${CT[g.t][0]}`:''}.</i>`,p.i);
- if(t.human)L(`<i>You lost ${CT[tk.t][0]}${g?`, received ${CT[g.t][0]}`:''}.</i>`,t.i);
-}
-async function rain(p){
- const o=order.filter(x=>x.alive),s=Math.max(0,o.indexOf(p));
- for(let k=0;k<o.length;k++){
-  const q=o[(s+k)%o.length];if(!q.alive||!q.hand.length)continue;
-  const d=q.human?await waitFor(q,'discard','Rainstorm! Discard a card.'):botDisc(q);
-  rm(q,d);disc.push(d);L(`${q.name} drops a card in the rain.`);
- }
-}
-function matatu(p){
- const ch=sh([...seats]).slice(0,Math.min(3,seats.length)),idx=ch.map(x=>seats.indexOf(x)).sort((a,b)=>a-b),or=idx.map(i=>seats[i]);
- idx.forEach((i,k)=>seats[i]=or[(k+1)%or.length]);
- L(`The Matatu shuffles ${or.map(x=>x.name).join(', ')}.`);
- if(has(p,'cond')){draw(p);L(`${p.name} (Conductor) draws a card.`)}
-}
-function traffic(p){
- order=[p,...sh(order.filter(x=>x.alive&&x!==p))];ptr=0;
- L(`Kampala Traffic! New order: ${order.map(x=>x.name).join(' → ')}`);
-}
-function win(){
- if(over)return;
- const al=P.filter(x=>x.alive),ch=P.find(x=>x.role=='Chairman');
- const hu=P.find(x=>x.role=='Hustler'),go=P.find(x=>x.role=='Gossip'),bh=P.find(x=>x.role=='Bounty Hunter');
- const W=(t,w)=>{over=1;wt=t;winners=w;L(`<b>${t}</b>`)};
 
- // The Hustler's coin goal is independent of the Chairman's survival.
- if(hu&&hu.alive&&hu.coins>=GOAL)return W(`${hu.name} the Hustler cashed out ${GOAL} coins!`,[hu]);
+  destroyPeer();
+  isHost = false;
+  phase = 'connecting';
+  show('menu');
+  status('Connecting to PeerJS…');
 
- // Chairman death ends the game for the Criminal Network, except when
- // the sole surviving player is an Independent.
- if(!ch.alive){
-  if(al.length===1&&fac(al[0].role)==='Independent')W(`${al[0].name} is the last one standing!`,al);
-  else W('The Chairman has fallen. The Criminal Network takes over Kampala!',P.filter(x=>fac(x.role)=='Criminal Network'));
-  return;
- }
+  const myGeneration = ++peerGeneration;
 
- if(go&&go.alive&&Object.keys(go.known).length>=GOSSIP)
-  return W(`${go.name} the Gossip uncovered enough secrets!`,[go]);
-
- if(bh&&bh.alive&&bh.kills>=2)
-  return W(`${bh.name} the Bounty Hunter claimed two bounties!`,[bh]);
-
- const cr=al.filter(x=>fac(x.role)=='Criminal Network').length;
- const ind=al.filter(x=>fac(x.role)=='Independent').length;
- if(!cr&&!ind)W('The Criminal Network is gone. The Community wins!',P.filter(x=>fac(x.role)=='Community'));
-}
-
-// ================= turns =================
-async function run(){
- const ch=P.find(x=>x.role=='Chairman');
- L('Night falls over Kampala…');
- await Promise.all(P.filter(x=>x.human).map(h=>ask(
-  h,
-  `<b>Your role: <span style="color:${FC[fac(h.role)]}">${h.role}</span></b> (${fac(h.role)})<br>${RD[h.role]}<br><br><b>Character: ${h.ch[0]}</b><br>${h.ch[2]}<br><br>The LC Chairman is <b>${ch.name}</b>. Everyone knows the Chairman’s identity.${poolTxt(h)}`,
-  ['Got it']
- )));
- while(!over){
-  const p=order[ptr];
-  if(p.alive){cur=p;await turn(p);cur=null;push()}
-  if(over)break;
-  const o=ptr;
-  do{ptr=(ptr+1)%order.length}while(!order[ptr].alive);
-  if(ptr<=o){
-   round++;
-   if(round>MAXR){
-    const s=P.find(x=>x.role=='Survivor'&&x.alive);
-    if(s){over=1;wt=`${s.name} the Survivor made it through the night!`;winners=[s];L(`<b>${wt}</b>`)}
-   }
+  try {
+    peer = new Peer({
+      debug: 1
+    });
+  } catch (err) {
+    status('Could not initialize PeerJS: ' + err.message);
+    return;
   }
- }
- P.forEach(p=>p.rev=true);
- finInfo={
-  t:wt,w:winners.map(x=>x.name),
-  roles:P.map(p=>`<span style="color:${FC[fac(p.role)]}">${p.role}</span> — ${p.name} (${p.ch[0]})${p.alive?'':' [out]'}`).join('<br>')
- };
- push();
-}
-async function turn(p){
- L(`<b class="or">— ${p.name}’s turn (round ${round}) —</b>`);await sl(p.human?250:600);
- if(p.skip){p.skip=0;p.cut=0;L(`${p.name} is stuck in a Traffic Jam and skips the turn.`);await sl(700);return}
- p.mug=0;
- const n=has(p,'vend')&&!p.hand.length?3:2;
- for(let i=0;i<n;i++){
-  if(!i&&has(p,'stu')&&disc.length)p.hand.push(disc.pop());
-  else draw(p);
- }
- L(`${p.name} draws ${n} cards.`);
- if(p.human){
-  for(;;){
-   const a=await waitFor(p,'play','Your turn: pick a card (then a target if needed).');
-   if(a=='end'||over||!p.human)break;
-   await play(p,a.c,a.t);
-   if(over||!p.alive)break;
+
+  let connected = false;
+
+  function failJoin(message) {
+    if (connected || myGeneration !== peerGeneration) return;
+
+    clearConnectionTimer();
+    console.error('[Join] Failed:', message);
+    status(message);
+
+    try {
+      if (conn) conn.close();
+    } catch (_) {}
   }
- }else{
-  for(let k=0;k<12&&p.alive&&!over;k++){
-   await sl(800);const m=botPick(p);if(!m)break;await play(p,m.c,m.t);
+
+  peer.on('open', id => {
+    if (myGeneration !== peerGeneration) return;
+
+    status('Connecting to room ' + code + '…');
+    console.log('[Join] Local PeerJS ID:', id);
+    console.log('[Join] Target PeerJS ID:', 'kampala-' + code);
+
+    conn = peer.connect('kampala-' + code, {
+      reliable: true,
+      serialization: 'json'
+    });
+
+    if (!conn) {
+      failJoin('PeerJS could not create the connection.');
+      return;
+    }
+
+    connectionTimer = setTimeout(() => {
+      failJoin(
+        'Connection timed out. Verify the room code and make sure the host is still online. ' +
+        'If it keeps happening, PeerJS signaling or the network may be blocked.'
+      );
+    }, 20000);
+
+    conn.on('open', () => {
+      if (myGeneration !== peerGeneration) return;
+
+      connected = true;
+      clearConnectionTimer();
+      console.log('[Join] Connected to host.');
+      status('Connected. Joining the lobby…');
+      conn.send({
+        t: 'join',
+        name: myName
+      });
+    });
+
+    conn.on('data', data => {
+      console.log('[Join] Received message:', data);
+      cdata(data);
+    });
+
+    conn.on('error', err => {
+      console.error('[Join] Data connection error:', err);
+      failJoin('Connection error: ' + (err.type || err.message || 'unknown error'));
+    });
+
+    conn.on('close', () => {
+      clearConnectionTimer();
+
+      if (phase !== 'menu') {
+        status('Disconnected from the host. Check whether the host is still online.');
+        if (phase === 'game') {
+          $('turnMessage').textContent = 'Disconnected from the host.';
+        }
+      }
+    });
+  });
+
+  peer.on('error', err => {
+    if (myGeneration !== peerGeneration) return;
+
+    console.error('[Join] PeerJS error:', err.type, err);
+
+    const messages = {
+      'peer-unavailable': 'No room found with that code. Check the code and make sure the host is online.',
+      'network': 'PeerJS signaling network error. Check your internet connection.',
+      'server-error': 'The PeerJS signaling server reported an error.',
+      'socket-error': 'Could not connect to the PeerJS signaling server.',
+      'socket-closed': 'The PeerJS signaling connection closed.',
+      'browser-incompatible': 'This browser does not support the required WebRTC features.'
+    };
+
+    failJoin(messages[err.type] ||
+      ('PeerJS error: ' + err.type + '. Open the browser console for details.'));
+  });
+
+  peer.on('disconnected', () => {
+    if (myGeneration === peerGeneration) {
+      console.warn('[Join] Disconnected from signaling server.');
+    }
+  });
+}
+
+/* =========================================================
+   LOBBY MANAGEMENT
+   ========================================================= */
+
+function hostData(c, data) {
+  if (!data || typeof data !== 'object') return;
+
+  if (data.t === 'join') {
+    if (phase !== 'lobby') {
+      safeSend(c, {
+        t: 'err',
+        m: 'That game has already started.'
+      });
+      setTimeout(() => {
+        try { c.close(); } catch (_) {}
+      }, 400);
+      return;
+    }
+
+    if (members.some(m => m.conn === c)) return;
+
+    if (members.length >= MAX_PLAYERS) {
+      safeSend(c, { t: 'err', m: 'That room is full.' });
+      setTimeout(() => {
+        try { c.close(); } catch (_) {}
+      }, 400);
+      return;
+    }
+
+    const name = cleanName(data.name) || 'Player';
+
+    members.push({
+      name,
+      conn: c,
+      host: false
+    });
+
+    lobbyPush();
+    return;
   }
- }
- if(over)return;
- while(p.alive&&p.hand.length>p.hp){
-  const d=p.human?await waitFor(p,'discard',`Hand limit is ${p.hp}. Discard a card.`):botDisc(p);
-  rm(p,d);disc.push(d);L(`${p.name} discards down to the hand limit.`);
- }
- p.cut=0;
+
+  if (data.t === 'act') {
+    const player = P.find(p => p.conn === c && p.human);
+    if (player && phase === 'game') {
+      onAct(player, data.a);
+    }
+  }
 }
 
-// ================= bots =================
-const others=p=>P.filter(o=>o.alive&&o!==p);
-function score(p,o){
- let s=Math.random()+(p.sus[o.i]||0)*1.5;const r=kr(p,o),f=r&&fac(r),pf=fac(p.role);
- if(r){
-  if(pf=='Community')s+=f=='Criminal Network'?10:f=='Community'?-10:0;
-  else if(pf=='Criminal Network')s+=r=='Chairman'?12:f=='Criminal Network'?-10:f=='Community'?3:1;
-  else s+=f=='Independent'?0:1;
- }else if(pf=='Criminal Network')s+=.5;
- if(pf=='Independent')s-=1.5;
- return s;
-}
-function botPick(p){
- const f=t=>p.hand.find(c=>c.t==t),good=(c,o)=>!ok(p,c,o);let c;
- if(p.hp<p.max&&(c=f(RO)))return{c};
- if(c=f(PO)){
-  const o=pick(others(p).filter(o=>!kr(p,o)));
-  if(o)return{c,t:o};
- }
- if((c=f(M))&&(!p.mug||has(p,'enf'))){
-  let b=null,bs=.5;
-  for(const o of others(p))if(good(c,o)){const s=score(p,o);if(s>bs){bs=s;b=o}}
-  if(!b&&Math.random()<.2)b=pick(others(p).filter(o=>good(c,o)&&score(p,o)>-5));
-  if(b)return{c,t:b};
- }
- if((c=f(PH))&&Math.random()<(fac(p.role)=='Criminal Network'?.15:.5)){
-  const o=pick(others(p).filter(o=>!kr(p,o)));
-  if(o)return{c,t:o};
- }
- if((c=f(MM))&&(p.role=='Hustler'||Math.random()<.6)){
-  const o=pick(others(p).filter(o=>good(c,o)));
-  if(o)return{c,t:o};
- }
- for(const t of[TJ,PC])if(c=f(t)){
-  const o=others(p).filter(o=>good(c,o)&&score(p,o)>2.5).sort((a,b)=>score(p,b)-score(p,a))[0];
-  if(o)return{c,t:o};
- }
- if((c=f(BO))&&f(M)&&Math.random()<.5){
-  const o=others(p).filter(o=>score(p,o)>2.5&&dist(p,o)>rng(p))[0];
-  if(o)return{c,t:o};
- }
- if((c=f(RA))&&p.hand.length<=3&&Math.random()<.5)return{c};
- if((c=f(MA))&&seats.length>=3&&Math.random()<.35)return{c};
- if((c=f(KT))&&Math.random()<.35)return{c};
- return null;
-}
-function botDisc(p){
- const v=c=>c.t==SC?10:c.t==RO?(p.hp<p.max?9:4):c.t==M?7:c.t==PO?6:(c.t==RA||c.t==KT)?1:3;
- return[...p.hand].sort((a,b)=>v(a)-v(b)+Math.random()-.5)[0];
+function safeSend(c, data) {
+  try {
+    if (c && c.open) c.send(data);
+  } catch (err) {
+    console.warn('Could not send to peer:', err);
+  }
 }
 
-// ================= per-player view (host -> each device) =================
-function view(p){
- const w=waitOn&&waitOn.p===p,pr=prompts[p.i];
- return{
-  info:`Round ${Math.min(round,MAXR)}/${MAXR} · Order: `+order.filter(x=>x.alive).map(x=>x===cur?`[${first(x)}]`:first(x)).join(' › '),
-  banner:over?'':w?(p.toast||waitOn.msg):(idle||(cur?`${cur.name} is ${cur.human?'taking their turn':'playing'}…`:'')),
-  mode:w?waitOn.mode:'',host:p===hostP,
-  players:[...seats,...P.filter(x=>!x.alive)].map(o=>({
-   i:o.i,name:o.name,bot:!o.human,ch:o.ch[0],cut:o.cut,skip:o.skip,
-   alive:o.alive,hp:o.hp,max:o.max,cards:o.hand.length,coins:o.coins,
-   role:kr(p,o),
-   hint:!kr(p,o)&&p.pool&&p.pool.has(o.i)
-    ?(p.role=='Informant'?'Community — or the Insider':'Gangster — or the Informant')
-    :'',
-   cur:o===cur,me:o===p,
-   d:p.alive&&o.alive&&o!==p?dist(p,o):null,
-   tg:w&&waitOn.mode=='play'&&sel&&o.alive?(ok(p,sel,o)?'dim':'tg'):''
-  })),
-  log:log.filter(e=>e.o===undefined||e.o===p.i).slice(-80).map(e=>e.t),
-  me:{role:p.role,ch:p.ch[0],desc:p.ch[2],cut:p.cut,range:rng(p),sel:w&&sel?sel.id:null,hand:p.hand.map(c=>({id:c.id,t:c.t}))},
-  prompt:pr?{html:pr.html,opts:pr.opts}:null,
-  over:over&&finInfo?finInfo:null
- };
+function dropConnection(c) {
+  if (phase === 'lobby') {
+    members = members.filter(m => m.conn !== c);
+    lobbyPush();
+    return;
+  }
+
+  if (phase === 'game') {
+    const player = P.find(p => p.conn === c && p.alive);
+    if (player) {
+      player.alive = false;
+      addLog(player.name + ' disconnected and left the game.');
+      checkWin();
+      push();
+    }
+  }
 }
 
-// ================= rendering (runs on every device) =================
-function render(v){
- if(!v)return;
- document.title=v.mode=='play'?'▶ Your turn — Kampala':'Kampala: After Dark';
- $('info').textContent=v.info;$('ban').textContent=v.banner;
- $('pl').innerHTML=v.players.map(o=>`<button class="pr ${o.tg} ${o.cur?'cur':''} ${o.alive?'':'dead'} ${o.me?'me':''}" onclick="act({k:'tgt',i:${o.i}})">
- <b>${o.name}${o.me?' (you)':''}${o.bot?' <small>(bot)</small>':''}${v.host&&!o.me&&!o.bot&&o.alive?` <span class="kk" onclick="event.stopPropagation();act({k:'bot',i:${o.i}})">replace with bot</span>`:''}</b>
- <small>${o.ch}${o.cut?' <u class="rd">POWER CUT</u>':''}</small>
- <span style="color:${o.role?FC[fac(o.role)]:'var(--mu)'}">${o.role||o.hint||'Role: ???'}</span>
- <span>${o.alive?`HP ${o.hp}/${o.max} · Cards ${o.cards} · Coins ${o.coins}${o.skip?' · <u>JAM</u>':''}${o.d!=null?` · distance ${o.d}`:''}`:'ELIMINATED'}</span>
- <i style="width:${Math.max(0,o.hp)/o.max*100}%"></i></button>`).join('');
- const lg=$('log');lg.innerHTML=v.log.map(t=>`<div>${t}</div>`).join('');lg.scrollTop=lg.scrollHeight;
- const m=v.me;
- $('me').innerHTML=`<b style="color:${FC[fac(m.role)]}">${m.role}</b> (${fac(m.role)}) — ${RD[m.role]}<br><b>${m.ch}</b>${m.cut?' <span class="rd">[POWER CUT]</span>':''}: ${m.desc} · Mugging range ${m.range}`;
- $('hand').innerHTML=m.hand.map(c=>`<button class="card ${m.sel===c.id?'sel':''} ${v.mode=='discard'?'dc':''}" style="--c:${COL[c.t]}" onclick="act({k:'card',id:${c.id}})"><b>${CT[c.t][0]}</b><small>${CT[c.t][1]}</small></button>`).join('');
- $('end').disabled=v.mode!='play';
- const ov=$('ov'),bx=$('box');
- if(v.prompt){
-  ov.hidden=false;
-  bx.innerHTML=`<p>${v.prompt.html}</p>`+v.prompt.opts.map((o,i)=>`<button class="btn" onclick="act({k:'ask',i:${i}})">${o}</button>`).join('');
- }else if(v.over){
-  ov.hidden=false;
-  bx.innerHTML=`<h2 class="or">Game over</h2>${v.over.t}<br><b>Winners:</b> ${v.over.w.join(', ')}<br><br>${v.over.roles}<br>`+(v.host?'<button class="btn" onclick="toLobby()">Back to lobby</button>':'<p>Waiting for the host to return to the lobby…</p>');
- }else ov.hidden=true;
+function lobbyPush() {
+  const names = members.map(m => m.name);
+
+  members.forEach(m => {
+    if (m.conn) {
+      safeSend(m.conn, {
+        t: 'lobby',
+        names,
+        code: CODE
+      });
+    }
+  });
+
+  showLobby(names, CODE);
 }
 
-// Auto-fill the join code from an invite link (?join=ABCDE).
-const qj=new URLSearchParams(location.search).get('join');if(qj)$('jc').value=qj.slice(0,5).toUpperCase();
+function showLobby(names, code) {
+  show('lobby');
+
+  $('code').textContent = code;
+  $('lnk').value = location.origin + location.pathname + '?join=' + code;
+
+  $('mem').innerHTML = '';
+
+  names.forEach((name, index) => {
+    const div = document.createElement('div');
+    div.className = 'player';
+    div.textContent = name + (index === 0 ? ' (host)' : '');
+    $('mem').appendChild(div);
+  });
+
+  $('hostctl').classList.toggle('hidden', !isHost);
+  $('lwait').classList.toggle('hidden', isHost);
+}
+
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText($('lnk').value);
+    status('Invite link copied.');
+  } catch (_) {
+    $('lnk').select();
+    status('Select and copy the invite link manually.');
+  }
+}
+
+async function copyCode() {
+  try {
+    await navigator.clipboard.writeText(CODE);
+    status('Room code copied.');
+  } catch (_) {
+    status('Your room code is ' + CODE);
+  }
+}
+
+function cdata(data) {
+  if (!data || typeof data !== 'object') return;
+
+  if (data.t === 'lobby') {
+    phase = 'lobby';
+    showLobby(data.names || [], data.code || '');
+  } else if (data.t === 'view') {
+    phase = 'game';
+    show('game');
+    render(data.v);
+  } else if (data.t === 'err') {
+    status(data.m || 'The host rejected the connection.');
+  }
+}
+
+/* =========================================================
+   ROLE DISTRIBUTION
+   ========================================================= */
+
+function assignRoles(n) {
+  if (n === 4) {
+    return shuffle([
+      'Chairman',
+      'Resident',
+      'Gangster',
+      pick(['Hustler', 'Survivor'])
+    ]);
+  }
+
+  const gangsterCount = n <= 5 ? 1 : n <= 10 ? 2 : 3;
+  const independentCount = n <= 9 ? 1 : 2;
+
+  const roles = ['Chairman'];
+
+  for (let i = 0; i < gangsterCount; i++) {
+    roles.push('Gangster');
+  }
+
+  if (n >= SPECIAL_MIN) {
+    roles.push('Informant', 'Insider');
+  }
+
+  let availableIndependents = [...INDEPENDENTS];
+
+  if (n < SPECIAL_MIN) {
+    availableIndependents = ['Hustler', 'Survivor'];
+  }
+
+  roles.push(...shuffle(availableIndependents).slice(0, independentCount));
+
+  while (roles.length < n) roles.push('Resident');
+
+  return shuffle(roles);
+}
+
+function faction(role) {
+  if (['Chairman', 'Resident', 'Informant'].includes(role)) {
+    return 'Community';
+  }
+
+  if (['Gangster', 'Insider'].includes(role)) {
+    return 'Criminal Network';
+  }
+
+  return 'Independent';
+}
+
+/* =========================================================
+   GAME INITIALIZATION
+   ========================================================= */
+
+function startNet() {
+  if (!isHost || phase !== 'lobby') return;
+
+  const humanMembers = members.filter(m =>
+    m.host || (m.conn && m.conn.open)
+  );
+
+  const requested = parseInt($('nt').value, 10) || MIN_PLAYERS;
+  const n = Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, humanMembers.length, requested));
+
+  if (humanMembers.length > n) {
+    status('There are more connected players than selected seats.');
+    return;
+  }
+
+  const roster = humanMembers.map(m => ({
+    name: m.name,
+    conn: m.conn,
+    host: !!m.host,
+    human: true
+  }));
+
+  while (roster.length < n) {
+    roster.push({
+      name: 'Bot ' + (roster.length + 1),
+      conn: null,
+      host: false,
+      human: false
+    });
+  }
+
+  setup(n, shuffle(roster));
+  phase = 'game';
+  show('game');
+  run();
+}
+
+function setup(n, roster) {
+  const roles = assignRoles(n);
+
+  P = roster.map((m, i) => ({
+    id: i,
+    name: m.name,
+    conn: m.conn,
+    host: !!m.host,
+    human: !!m.human,
+    role: roles[i],
+    hp: 3,
+    maxHp: 3,
+    coins: 0,
+    kills: 0,
+    alive: true,
+    hand: [],
+    knownRoles: [],
+    revealedRole: null
+  }));
+
+  hostP = P.find(p => p.host) || null;
+  turnIndex = 0;
+  roundNo = 1;
+  gameOver = false;
+  gameLog = [];
+
+  P.forEach(p => {
+    p.hand = drawCards(4);
+  });
+
+  const chairman = P.find(p => p.role === 'Chairman');
+  if (chairman) chairman.revealedRole = 'Chairman';
+
+  P.forEach(p => {
+    if (p.role === 'Informant' || p.role === 'Insider') {
+      const chairmanPlayer = P.find(x => x.role === 'Chairman');
+      if (chairmanPlayer) p.knownRoles.push(chairmanPlayer.id);
+    }
+  });
+
+  addLog('The game begins. The Chairman is publicly known.');
+  addLog('Round 1 begins.');
+}
+
+function drawCards(n) {
+  const deck = Object.keys(CARD_DEFS);
+  const cards = [];
+
+  for (let i = 0; i < n; i++) {
+    cards.push(pick(deck));
+  }
+
+  return cards;
+}
+
+function run() {
+  push();
+  runBotIfNeeded();
+}
+
+/* =========================================================
+   TURNS AND ACTIONS
+   ========================================================= */
+
+function currentPlayer() {
+  return P[turnIndex] || null;
+}
+
+function nextAliveIndex(from) {
+  if (!P.length) return 0;
+
+  for (let step = 1; step <= P.length; step++) {
+    const idx = (from + step) % P.length;
+    if (P[idx].alive) return idx;
+  }
+
+  return from;
+}
+
+function onAct(player, action) {
+  if (gameOver || phase !== 'game') return;
+  if (!player || !player.alive) return;
+  if (currentPlayer()?.id !== player.id) return;
+  if (!action || typeof action !== 'object') return;
+
+  if (action.kind === 'pass') {
+    addLog(player.name + ' passed their turn.');
+    advanceTurn();
+    return;
+  }
+
+  if (action.kind !== 'card') return;
+
+  const cardIndex = Number(action.cardIndex);
+
+  if (!Number.isInteger(cardIndex) ||
+      cardIndex < 0 || cardIndex >= player.hand.length) {
+    return;
+  }
+
+  const cardName = player.hand[cardIndex];
+  const card = CARD_DEFS[cardName];
+
+  if (!card) return;
+
+  let target = null;
+
+  if (card.target) {
+    target = P.find(p => p.id === Number(action.targetId));
+
+    if (!target || !target.alive || target.id === player.id) {
+      if (player.human) {
+        addLog('Choose a living player other than yourself as the target.');
+        push();
+      }
+      return;
+    }
+  }
+
+  player.hand.splice(cardIndex, 1);
+
+  switch (card.type) {
+    case 'attack':
+      addLog(player.name + ' played ' + cardName + ' against ' + target.name + '.');
+      target.hp -= card.damage;
+
+      if (target.hp <= 0) {
+        eliminate(target, player);
+      } else {
+        addLog(target.name + ' has ' + target.hp + ' health remaining.');
+      }
+      break;
+
+    case 'steal':
+      if (target.coins > 0) {
+        target.coins--;
+        player.coins++;
+        addLog(player.name + ' took a coin from ' + target.name + '.');
+      } else {
+        addLog(player.name + ' searched ' + target.name + ' but found no coins.');
+      }
+      break;
+
+    case 'coins':
+      player.coins += card.amount;
+      addLog(player.name + ' played ' + cardName + ' and gained ' + card.amount + ' coin(s).');
+      break;
+
+    case 'heal':
+      player.hp = Math.min(player.maxHp, player.hp + card.amount);
+      addLog(player.name + ' played ' + cardName + ' and recovered health.');
+      break;
+
+    case 'inspect': {
+      const role = target.role;
+
+      if (!player.knownRoles.includes(target.id)) {
+        player.knownRoles.push(target.id);
+      }
+
+      player.knownRoles.forEach(id => {
+        const found = P.find(p => p.id === id);
+        if (found) player.knownRoles.push(found.id);
+      });
+
+      addLog(player.name + ' made a phone call to ' + target.name + '.');
+      player.lastPrivateInfo = 'Phone Call: ' + target.name + ' is ' + role + '.';
+
+      if (player.role === 'Gossip') {
+        player.knownRoleNames = player.knownRoleNames || [];
+        player.knownRoleNames.push(role);
+        player.knownRoleNames = [...new Set(player.knownRoleNames)];
+      }
+
+      break;
+    }
+  }
+
+  player.hand.push(...drawCards(1));
+
+  if (checkWin()) {
+    push();
+    return;
+  }
+
+  advanceTurn();
+}
+
+function eliminate(target, killer) {
+  if (!target.alive) return;
+
+  target.alive = false;
+  addLog(target.name + ' was eliminated. Their role was ' + target.role + '.');
+
+  if (killer && killer.id !== target.id) {
+    killer.kills++;
+  }
+
+  if (target.role === 'Gossip') {
+    // A defeated Gossip cannot claim its survival-based victory.
+  }
+}
+
+function advanceTurn() {
+  if (gameOver) return;
+
+  const previous = turnIndex;
+  turnIndex = nextAliveIndex(turnIndex);
+
+  if (turnIndex <= previous) {
+    roundNo++;
+
+    if (roundNo > MAX_ROUNDS) {
+      resolveRoundLimit();
+      if (gameOver) {
+        push();
+        return;
+      }
+      roundNo = MAX_ROUNDS;
+    }
+
+    addLog('Round ' + roundNo + ' begins.');
+  }
+
+  if (checkWin()) {
+    push();
+    return;
+  }
+
+  push();
+  runBotIfNeeded();
+}
+
+function runBotIfNeeded() {
+  if (gameOver || phase !== 'game') return;
+
+  const player = currentPlayer();
+
+  if (!player || player.human || !player.alive) return;
+
+  setTimeout(() => {
+    if (gameOver || phase !== 'game') return;
+    if (currentPlayer()?.id !== player.id) return;
+
+    const targetOptions = P.filter(p => p.alive && p.id !== player.id);
+    const attackCards = player.hand
+      .map((name, index) => ({ name, index }))
+      .filter(x => CARD_DEFS[x.name].type === 'attack');
+
+    if (attackCards.length && targetOptions.length) {
+      const chosen = pick(attackCards);
+      onAct(player, {
+        kind: 'card',
+        cardIndex: chosen.index,
+        targetId: pick(targetOptions).id
+      });
+      return;
+    }
+
+    const usefulCards = player.hand
+      .map((name, index) => ({ name, index }))
+      .filter(x => ['coins', 'heal', 'steal'].includes(CARD_DEFS[x.name].type));
+
+    if (usefulCards.length) {
+      const chosen = pick(usefulCards);
+      const def = CARD_DEFS[chosen.name];
+      const target = def.target ? pick(targetOptions) : null;
+
+      onAct(player, {
+        kind: 'card',
+        cardIndex: chosen.index,
+        targetId: target?.id
+      });
+      return;
+    }
+
+    onAct(player, { kind: 'pass' });
+  }, 650);
+}
+
+/* =========================================================
+   VICTORY CONDITIONS
+   ========================================================= */
+
+function checkWin() {
+  if (gameOver) return true;
+
+  const alive = P.filter(p => p.alive);
+  const chairman = P.find(p => p.role === 'Chairman');
+  const criminals = alive.filter(p => faction(p.role) === 'Criminal Network');
+  const independents = alive.filter(p => faction(p.role) === 'Independent');
+
+  // The Chairman's death triggers the Criminal Network's victory,
+  // except when the only living player is an Independent.
+  if (chairman && !chairman.alive) {
+    if (alive.length === 1 && faction(alive[0].role) === 'Independent') {
+      finishGame(alive[0].role + ' wins alone!', alive[0].name + ' is the only remaining player.');
+    } else {
+      finishGame('Criminal Network wins!', 'The Chairman has been eliminated.');
+    }
+    return true;
+  }
+
+  for (const p of alive) {
+    if (p.role === 'Hustler' && p.coins >= 6) {
+      finishGame('Hustler wins alone!', p.name + ' collected 6 coins.');
+      return true;
+    }
+
+    if (p.role === 'Gossip' &&
+        new Set(p.knownRoleNames || []).size >= 5) {
+      finishGame('Gossip wins alone!', p.name + ' learned 5 distinct roles.');
+      return true;
+    }
+
+    if (p.role === 'Bounty Hunter' && p.kills >= 2) {
+      finishGame('Bounty Hunter wins alone!', p.name + ' eliminated 2 players.');
+      return true;
+    }
+  }
+
+  if (criminals.length === 0 && independents.length === 0) {
+    finishGame('Community wins!', 'The Criminal Network and all Independents have been eliminated.');
+    return true;
+  }
+
+  return false;
+}
+
+function resolveRoundLimit() {
+  const survivors = P.filter(p => p.alive && p.role === 'Survivor');
+
+  if (survivors.length) {
+    finishGame('Survivor wins alone!', survivors.map(p => p.name).join(', ') + ' survived through round 12.');
+    return;
+  }
+
+  const alive = P.filter(p => p.alive);
+  const criminals = alive.filter(p => faction(p.role) === 'Criminal Network');
+  const independents = alive.filter(p => faction(p.role) === 'Independent');
+
+  if (criminals.length && independents.length) {
+    finishGame('The city remains divided.', 'Round 12 ended with both the Criminal Network and Independents alive.');
+  } else if (criminals.length) {
+    finishGame('Criminal Network wins!', 'The Criminal Network survived to the end.');
+  } else if (independents.length) {
+    finishGame('Independent victory!', independents.map(p => p.name).join(', ') + ' survived to the end.');
+  } else {
+    finishGame('Community wins!', 'The Criminal Network was eliminated.');
+  }
+}
+
+function finishGame(title, message) {
+  if (gameOver) return;
+
+  gameOver = true;
+  addLog(title + ' ' + message);
+  $('endTitle').textContent = title;
+  $('endText').textContent = message;
+  $('endPanel').classList.remove('hidden');
+}
+
+/* =========================================================
+   PRIVATE INFORMATION AND RENDERING
+   ========================================================= */
+
+function privateKnowledge(player) {
+  const out = [];
+
+  if (player.role === 'Informant') {
+    out.push('You know the Chairman.');
+    out.push('You cannot reliably distinguish the Insider from Community members.');
+  } else if (player.role === 'Insider') {
+    out.push('You know the Chairman.');
+    out.push('You cannot reliably distinguish the Informant from Gangsters.');
+  }
+
+  if (player.role === 'Phone Caller') {
+    out.push('You have special information.');
+  }
+
+  if (player.lastPrivateInfo) {
+    out.push(player.lastPrivateInfo);
+  }
+
+  if (player.role === 'Gossip') {
+    const count = new Set(player.knownRoleNames || []).size;
+    out.push('Distinct roles learned: ' + count + '/5.');
+  }
+
+  return out.join(' ');
+}
+
+function playerPublicInfo(p) {
+  const parts = [];
+
+  if (p.revealedRole) parts.push(p.revealedRole);
+  parts.push('Health ' + p.hp + '/' + p.maxHp);
+  parts.push('Coins ' + p.coins);
+
+  if (!p.alive) parts.push('Eliminated');
+
+  return parts.join(' · ');
+}
+
+function makeView(player) {
+  const chairman = P.find(p => p.role === 'Chairman');
+
+  return {
+    self: {
+      id: player.id,
+      name: player.name,
+      role: player.role,
+      faction: faction(player.role),
+      alive: player.alive,
+      hp: player.hp,
+      maxHp: player.maxHp,
+      coins: player.coins,
+      kills: player.kills,
+      hand: [...player.hand],
+      privateInfo: privateKnowledge(player),
+      gossipCount: new Set(player.knownRoleNames || []).size
+    },
+    players: P.map(p => ({
+      id: p.id,
+      name: p.name,
+      role: p.revealedRole || null,
+      hp: p.hp,
+      maxHp: p.maxHp,
+      coins: p.coins,
+      alive: p.alive,
+      isCurrent: p.id === currentPlayer()?.id
+    })),
+    round: roundNo,
+    log: [...gameLog],
+    gameOver,
+    isMyTurn: currentPlayer()?.id === player.id && player.alive && !gameOver,
+    chairman: chairman ? chairman.name : 'Unknown',
+    endTitle: gameOver ? $('endTitle').textContent : '',
+    endText: gameOver ? $('endText').textContent : ''
+  };
+}
+
+function push() {
+  if (phase !== 'game') return;
+
+  P.filter(p => p.human).forEach(player => {
+    const view = makeView(player);
+
+    if (player.host) {
+      render(view);
+    } else if (player.conn && player.conn.open) {
+      safeSend(player.conn, { t: 'view', v: view });
+    }
+  });
+}
+
+function render(view) {
+  if (!view || !view.self) return;
+
+  show('game');
+
+  const self = view.self;
+  $('roundTitle').textContent = 'Round ' + view.round;
+  $('identity').textContent =
+    'You are ' + self.role + ' · ' + self.faction +
+    ' · Health ' + self.hp + '/' + self.maxHp +
+    ' · Coins ' + self.coins +
+    (self.role === 'Bounty Hunter' ? ' · Eliminations ' + self.kills : '');
+
+  $('objective').textContent = ROLE_INFO[self.role]?.description || '';
+  $('handNote').textContent = self.privateInfo || '';
+
+  $('turnMessage').textContent = view.gameOver
+    ? 'Game over.'
+    : view.isMyTurn
+      ? 'It is your turn. Play one card or pass.'
+      : 'Waiting for the active player.';
+
+  $('players').innerHTML = '';
+
+  view.players.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'player' +
+      (!p.alive ? ' dead' : '') +
+      (p.isCurrent ? ' current' : '');
+
+    const title = document.createElement('strong');
+    title.textContent = p.name + (p.isCurrent ? ' ◀' : '');
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = p.role
+      ? p.role + ' · '
+      : 'Role hidden · ';
+
+    meta.textContent += 'HP ' + p.hp + '/' + p.maxHp + ' · Coins ' + p.coins;
+
+    div.append(title, meta);
+    $('players').appendChild(div);
+  });
+
+  $('hand').innerHTML = '';
+
+  self.hand.forEach((cardName, index) => {
+    const def = CARD_DEFS[cardName];
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const title = document.createElement('strong');
+    title.textContent = cardName;
+
+    const desc = document.createElement('small');
+    desc.textContent = def.description;
+
+    const button = document.createElement('button');
+    button.textContent = 'Play card';
+    button.disabled = !view.isMyTurn || view.gameOver;
+    button.onclick = () => {
+      let targetId = null;
+
+      if (def.target) {
+        const targetValue = $('target').value;
+        if (targetValue === '') {
+          alert('Choose a target first.');
+          return;
+        }
+        targetId = Number(targetValue);
+      }
+
+      sendAction({
+        kind: 'card',
+        cardIndex: index,
+        targetId
+      });
+    };
+
+    card.append(title, desc, button);
+    $('hand').appendChild(card);
+  });
+
+  $('target').innerHTML = '';
+
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = 'Choose a player';
+  $('target').appendChild(placeholder);
+
+  view.players.filter(p => p.alive && p.id !== self.id).forEach(p => {
+    const option = document.createElement('option');
+    option.value = p.id;
+    option.textContent = p.name;
+    $('target').appendChild(option);
+  });
+
+  $('passBtn').disabled = !view.isMyTurn || view.gameOver;
+
+  $('log').innerHTML = '';
+  view.log.slice().reverse().forEach(line => {
+    const div = document.createElement('div');
+    div.textContent = line;
+    $('log').appendChild(div);
+  });
+
+  $('endPanel').classList.toggle('hidden', !view.gameOver);
+  if (view.gameOver) {
+    $('endTitle').textContent = view.endTitle;
+    $('endText').textContent = view.endText;
+  }
+}
+
+function addLog(message) {
+  gameLog.push(message);
+  if (gameLog.length > 80) gameLog.shift();
+}
+
+function sendAction(action) {
+  if (isHost) {
+    if (hostP) onAct(hostP, action);
+  } else {
+    sendToHost({
+      t: 'act',
+      a: action
+    });
+  }
+}
+
+/* =========================================================
+   MENU AND INVITE LINK
+   ========================================================= */
+
+function backToMenu() {
+  phase = 'menu';
+  gameOver = false;
+  P = [];
+  members = [];
+  hostP = null;
+  destroyPeer();
+  show('menu');
+  status('Returned to the menu.');
+}
+
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(location.search);
+  const joinCode = params.get('join');
+
+  if (joinCode && /^[A-Z2-9]{5}$/i.test(joinCode)) {
+    $('jc').value = joinCode.toUpperCase();
+  }
+
+  $('nm').addEventListener('keydown', event => {
+    if (event.key === 'Enter') hostGame();
+  });
+
+  $('jc').addEventListener('keydown', event => {
+    if (event.key === 'Enter') joinGame();
+  });
+
+  $('jc').addEventListener('input', () => {
+    $('jc').value = $('jc').value.toUpperCase().replace(/[^A-Z2-9]/g, '').slice(0, 5);
+  });
+});
 </script>
 </body>
 </html>
