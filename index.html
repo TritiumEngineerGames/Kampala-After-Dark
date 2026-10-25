@@ -57,7 +57,7 @@ h3{margin:0 0 6px;color:var(--mu);font-size:.85em;text-transform:uppercase;lette
 <body>
 <div id="menu" class="wrap">
  <h1>KAMPALA: AFTER DARK</h1>
- <p>A game of hidden roles on the streets of Kampala, inspired by <i>Bang!</i>. One person hosts, friends join from their own devices with a code, and bots fill the empty seats (4–12 players total).</p>
+ <p>A game of hidden roles on the streets of Kampala, inspired by <i>Bang!</i>. One person hosts, friends join from their own devices with a code, and bots fill the empty seats (4–12 players total). With 8+ players the Informant and Insider join the game.</p>
  <div class="box">Your name: <input id="nm" maxlength="14" placeholder="Name"></div>
  <div class="box"><b>Host a game</b><br><br><button class="btn" onclick="hostGame()">Create game</button></div>
  <div class="box"><b>Join a game</b><br><br>Code: <input id="jc" maxlength="5" placeholder="ABCDE" style="text-transform:uppercase;width:6em"> <button class="btn" onclick="joinGame()">Join</button></div>
@@ -106,13 +106,13 @@ h3{margin:0 0 6px;color:var(--mu);font-size:.85em;text-transform:uppercase;lette
 const $=i=>document.getElementById(i),sl=ms=>new Promise(r=>setTimeout(r,ms)),rnd=n=>Math.floor(Math.random()*n);
 const sh=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
 const pick=a=>a.length?a[rnd(a.length)]:null;
-const fac=r=>r=='Chairman'||r=='Resident'?'Community':r=='Gangster'?'Criminal Network':'Independent';
+const fac=r=>r=='Chairman'||r=='Resident'||r=='Informant'?'Community':r=='Gangster'||r=='Insider'?'Criminal Network':'Independent';
 const FC={Community:'var(--gr)','Criminal Network':'var(--rd)',Independent:'var(--yl)'};
-const RD={Chairman:'Public community leader. Survive and expose the Criminal Network.',Resident:'Protect the Chairman and find the Criminals.',Gangster:'Eliminate the LC Chairman. Blend in with the Community.',Hustler:'Win alone by collecting 6 coins (Mobile Money).',Survivor:'Win alone by being alive when round 13 begins.'};
-const MAXR=12,GOAL=6;
-const [M,SC,RO,BO,PC,PO,MM,TJ,RA,MA,PH,KT]=[...Array(12).keys()];
-const CT=[['Mugging','Hit a player within range 2 for 1 damage. One per turn.',22,1],['Shortcut','Reaction: cancel a Mugging aimed at you.',12,0],['Rolex','Heal 1 HP.',8,0],['Boda Ride','Move any player (even you) 2 seats around the table.',6,1],['Power Cut','Cancel a player’s ability until their turn ends.',5,1],['Police Check','Secretly learn a player’s role.',5,1],['Mobile Money','Swap a random card with a player. Both gain 1 coin.',6,1],['Traffic Jam','Target player skips their next turn.',4,1],['Rainstorm','Everyone discards a card.',3,0],['Matatu','Shuffle the seats of 3 random players.',3,0],['Phone Call','Privately swap role info with a player.',4,1],['Kampala Traffic','Randomly reshuffle the turn order.',3,0]];
-const COL=['#9e2e2e','#335aa6','#338f4d','#bf731f','#737333','#4d4d99','#998019','#8c4073','#408c8c','#b35980','#598073','#80664d'];
+const RD={Chairman:'Public community leader. Survive and expose the Criminal Network.',Resident:'Protect the Chairman and find the Criminals.',Gangster:'Eliminate the LC Chairman. Blend in with the Community.',Hustler:'Win alone by collecting 6 coins (Mobile Money).',Survivor:'Win alone by being alive when round 13 begins.',Informant:'Community. You see every Community member plus one hidden enemy, the Insider, but not which marked player is which. Protect the Chairman.',Insider:'Criminal Network. You see every Gangster plus one hidden enemy, the Informant, but not which marked player is which. Eliminate the Chairman.',Gossip:'Win alone by learning 5 players’ roles (Police Check, Phone Call).','Bounty Hunter':'Win alone by landing the killing blow on 2 players.'};
+const MAXR=12,GOAL=6,GOSSIP=5,SPECIAL_MIN=8,INDEP=['Hustler','Survivor','Gossip','Bounty Hunter'];
+const [M,SC,RO,BO,PC,PO,MM,TJ,RA,MA,PH,KT,PB,CL,KD,BZ,PT,SH,UT]=[...Array(19).keys()];
+const CT=[['Mugging','Hit a player within range 2 for 1 damage. One per turn.',22,1],['Shortcut','Reaction: cancel a Mugging aimed at you.',12,0],['Rolex','Heal 1 HP.',8,0],['Boda Ride','Move any player (even you) 2 seats around the table.',6,1],['Power Cut','Cancel a player’s ability until their turn ends.',5,1],['Police Check','Secretly learn a player’s role.',5,1],['Mobile Money','Swap a random card with a player. Both gain 1 coin.',6,1],['Traffic Jam','Target player skips their next turn.',4,1],['Rainstorm','Everyone discards a card.',3,0],['Matatu','Shuffle the seats of 3 random players.',3,0],['Phone Call','Privately swap role info with a player.',4,1],['Kampala Traffic','Randomly reshuffle the turn order.',3,0],['Posho & Beans','Heal any player (including you) by 1 HP.',6,1],['KCCA Clamp','Clamp a player: no Muggings from them until their turn ends.',4,1],['Kikuubo Deal','Draw 2 cards.',5,0],['Baraza','You and both seat neighbours each draw a card.',4,0],['Pothole','Target discards a card of their choice or takes 1 damage. Any distance.',5,1],['Special Hire','Swap seats with any player.',4,1],['URA Tax','Target loses 2 coins (hits the Hustler).',3,1]];
+const COL=['#9e2e2e','#335aa6','#338f4d','#bf731f','#737333','#4d4d99','#998019','#8c4073','#408c8c','#b35980','#598073','#80664d','#4d8c5f','#6b6b6b','#8a6a2a','#4a7a9b','#7a4a2a','#9b5a2a','#6a4a8a'];
 const CH=[['Boda Rider','range','Mugging range +1.'],['Mama Ntilie','heal','Rolex heals 2 HP.'],['Street Vendor','vend','Draw 3 if your hand is empty at turn start.'],['Pickpocket','pick','Mobile Money: take a card without giving one.'],['Lawyer','law','Police Checks on you fail.'],['Journalist','jour','Draw a card when you play Phone Call.'],['Bouncer','enf','Any number of Muggings per turn.'],['Matatu Conductor','cond','Draw a card when you play Matatu.'],['Night Guard','guard','+1 max HP.'],['Makerere Student','stu','First draw each turn comes from the discard pile.'],['MP Hopeful','pol','Draw a card whenever you survive damage.'],['Owino Trader','trade','Mobile Money gives you 2 coins instead of 1.']];
 const NAMES=['Mukasa','Nakato','Okello','Atim','Kato','Namatovu','Ssemakula','Achieng','Byaruhanga','Nambi','Opio','Tumusiime','Akello','Wasswa'];
 
@@ -122,7 +122,11 @@ const HELP_ROLES=[
  ['Resident','Community','Protect the Chairman and find the Criminals. The Community wins when the Criminal Network and all Independent roles are gone.'],
  ['Gangster','Criminal Network','Eliminate the LC Chairman. If the Chairman falls, the Criminal Network takes over Kampala.'],
  ['Hustler','Independent','Win alone by collecting 6 coins through Mobile Money.'],
- ['Survivor','Independent','Win alone by remaining alive when round 13 begins.']
+ ['Survivor','Independent','Win alone by remaining alive when round 13 begins.'],
+ ['Informant','Community','Needs 8+ players. Sees every Community member plus one hidden enemy (the Insider), but cannot tell which marked player is the Insider.'],
+ ['Insider','Criminal Network','Needs 8+ players. Sees every Gangster plus one hidden enemy (the Informant), but cannot tell which marked player is the Informant.'],
+ ['Gossip','Independent','Win alone by learning 5 players’ roles through Police Check or Phone Call.'],
+ ['Bounty Hunter','Independent','Win alone by landing the killing blow on 2 players.']
 ];
 function helpTab(tab){
  document.querySelectorAll('.helptabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
@@ -147,7 +151,7 @@ function helpCardDescription(i){
   'You and the target privately learn each other’s roles. Journalist draws an additional card when playing Phone Call.',
   'Randomly reshuffle the turn order.'
  ];
- return descriptions[i];
+ return descriptions[i]||CT[i][1];
 }
 function openHelp(){if($('game').hidden)return;helpTab('roles');$('help').hidden=false}
 function closeHelp(){$('help').hidden=true}
@@ -223,20 +227,22 @@ function push(){if(pend||!hostP)return;pend=1;setTimeout(()=>{pend=0;P.forEach(p
 // ================= game setup (host) =================
 function BR(n){
  if(n<=4){
-  if(n===4)return sh(['Chairman','Gangster','Resident',Math.random()<.5?'Hustler':'Survivor']);
+  if(n===4)return sh(['Chairman','Gangster','Resident',pick(INDEP)]);
   return sh(['Chairman','Gangster','Resident'].slice(0,n));
  }
  const cr=n<=7?2:n<=10?3:4,l=['Chairman',...Array(cr).fill('Gangster')];
- if(n<=9)l.push(Math.random()<.5?'Hustler':'Survivor');else l.push('Hustler','Survivor');
- while(l.length<n)l.push('Resident');return sh(l)
+ l.push(...sh([...INDEP]).slice(0,n<=9?1:2));
+ while(l.length<n)l.push('Resident');if(n>=SPECIAL_MIN){l[l.indexOf('Resident')]='Informant';l[l.indexOf('Gangster')]='Insider'}return sh(l)
 }
 function draw(p,k=1){while(k--){if(!deck.length){if(!disc.length)return;deck=sh(disc);disc=[];L('The deck is reshuffled.')}p.hand.push(deck.pop())}}
 function setup(n,mem){
  P=[];log=[];deck=[];disc=[];over=0;round=1;cur=null;waitOn=null;sel=null;idle='';prompts={};finInfo=null;hostP=null;
  const roles=BR(n),chars=sh([...CH]),bots=sh([...NAMES]);
  for(let i=0;i<n;i++){const ch=chars[i],r=roles[i],max=4+(ch[1]=='guard'?1:0)+(r=='Chairman'?1:0),m=mem[i];
-  P.push({i,name:m?m.name:bots.pop(),human:!!m,conn:m?m.conn:null,role:r,ch,hp:max,max,coins:0,alive:true,skip:0,cut:0,rev:r=='Chairman',hand:[],known:{},sus:{},mug:0,toast:''})}
+  P.push({i,name:m?m.name:bots.pop(),human:!!m,conn:m?m.conn:null,role:r,ch,hp:max,max,coins:0,alive:true,skip:0,cut:0,rev:r=='Chairman',hand:[],known:{},sus:{},mug:0,clamp:0,kills:0,pool:null,toast:''})}
  hostP=P.find(x=>x.human&&!x.conn);
+ const ifm=P.find(x=>x.role=='Informant'),ins=P.find(x=>x.role=='Insider');
+ if(ifm&&ins){ifm.pool=new Set(P.filter(x=>fac(x.role)=='Community'||x===ins).map(x=>x.i));ins.pool=new Set(P.filter(x=>x.role=='Gangster'||x===ifm||x===ins).map(x=>x.i))}
  seats=sh([...P]);order=[...seats];ptr=order.indexOf(P.find(x=>x.role=='Chairman'));
  let id=0;CT.forEach((c,t)=>{for(let k=0;k<c[2];k++)deck.push({t,id:id++})});sh(deck);
  P.forEach(p=>draw(p,4));
@@ -284,11 +290,14 @@ function onAct(p,a){
 // ================= rules =================
 function ok(a,c,t){
  if(!t||!t.alive)return'Invalid target.';
- if(c.t!=BO&&t===a)return'You can’t target yourself with that.';
- if(c.t==M){if(a.mug&&!has(a,'enf'))return'Only one Mugging per turn.';const d=dist(a,t);if(d>rng(a))return`${t.name} is too far (distance ${d}, range ${rng(a)}). Try a Boda Ride.`}
+ if(c.t!=BO&&c.t!=PB&&t===a)return'You can’t target yourself with that.';
+ if(c.t==M){if(a.clamp)return'You’re clamped: no Muggings until your turn ends.';if(a.mug&&!has(a,'enf'))return'Only one Mugging per turn.';const d=dist(a,t);if(d>rng(a))return`${t.name} is too far (distance ${d}, range ${rng(a)}). Try a Boda Ride.`}
  if(c.t==PC&&t.cut)return'Already without power.';
  if(c.t==MM&&!t.hand.length)return`${t.name} has no cards.`;
  if(c.t==TJ&&t.skip)return'Already stuck in traffic.';
+ if(c.t==PB&&t.hp>=t.max)return`${t.name} is already at full health.`;
+ if(c.t==CL&&t.clamp)return'Already clamped.';
+ if(c.t==UT&&t.coins<=0)return`${t.name} has no coins to tax.`;
  return'';
 }
 function okN(a,c){
@@ -312,6 +321,13 @@ async function play(p,c,t){
   case MA:matatu(p);break;
   case PH:await phone(p,t);break;
   case KT:traffic(p);break;
+  case PB:t.hp=Math.min(t.max,t.hp+1);L(`${t.name} eats Posho & Beans and heals (HP ${t.hp}).`);break;
+  case CL:t.clamp=1;L(`${t.name} is clamped: no Muggings until their turn ends.`);break;
+  case KD:draw(p,2);L(`${p.name} strikes a deal in Kikuubo and draws 2 cards.`);break;
+  case BZ:{const i=seats.indexOf(p),n=seats.length,g=new Set([p,seats[(i+1)%n],seats[(i+n-1)%n]]);g.forEach(x=>draw(x));L(`Baraza! ${[...g].map(x=>x.name).join(', ')} each draw a card.`);break}
+  case PT:await pothole(p,t);break;
+  case SH:{const i=seats.indexOf(p),j=seats.indexOf(t);seats[i]=t;seats[j]=p;L(`${p.name} and ${t.name} swap seats.`);break}
+  case UT:{const x=Math.min(2,t.coins);t.coins-=x;L(`URA taxes ${t.name}: ${x} coin${x==1?'':'s'} lost.`);break}
  }
  win();push();
 }
@@ -331,6 +347,7 @@ async function dmg(t,a,src){
  push();await sl(300);
 }
 function elim(t,src){
+ if(src&&src!==t)src.kills=(src.kills||0)+1;
  t.alive=false;t.rev=true;t.hp=0;seats.splice(seats.indexOf(t),1);disc.push(...t.hand);t.hand=[];
  L(`<b class="rd">${t.name} is out! They were the ${t.role}.</b>`);
  if(src&&src.alive){
@@ -363,6 +380,17 @@ async function rain(p){
   const d=q.human?await waitFor(q,'discard','Rainstorm! Discard a card.'):botDisc(q);
   rm(q,d);disc.push(d);L(`${q.name} drops a card in the rain.`)}
 }
+function poolTxt(h){
+ if(!h.pool)return'';
+ const inf=h.role=='Informant',names=[...h.pool].filter(i=>i!==h.i).map(i=>P[i].name).join(', ');
+ return`<br><br><b>${inf?'You can see the Community, plus one hidden Insider':'You can see the Gangsters, plus one hidden Informant'}:</b> ${names}.<br>You can’t tell which of them is the ${inf?'Insider':'Informant'}.`
+}
+async function pothole(p,t){
+ t.sus[p.i]=(t.sus[p.i]||0)+1;
+ const hurt=!t.hand.length?true:t.human?(await ask(t,`<b>${p.name}</b> sends you into a pothole! Discard a card, or take 1 damage?`,['Discard a card','Take 1 damage']))==1:t.hp>=3&&Math.random()<.3;
+ if(hurt)await dmg(t,1,p);
+ else{const d=t.human?await waitFor(t,'discard','Pothole! Discard a card.'):botDisc(t);rm(t,d);disc.push(d);L(`${t.name} drops a card into the pothole.`)}
+}
 function matatu(p){
  const ch=sh([...seats]).slice(0,Math.min(3,seats.length)),idx=ch.map(x=>seats.indexOf(x)).sort((a,b)=>a-b),or=idx.map(i=>seats[i]);
  idx.forEach((i,k)=>seats[i]=or[(k+1)%or.length]);
@@ -375,6 +403,10 @@ function win(){
  const al=P.filter(x=>x.alive),ch=P.find(x=>x.role=='Chairman'),hu=P.find(x=>x.role=='Hustler');
  const W=(t,w)=>{over=1;wt=t;winners=w;L(`<b>${t}</b>`)};
  if(hu&&hu.alive&&hu.coins>=GOAL)return W(`${hu.name} the Hustler cashed out ${GOAL} coins!`,[hu]);
+ const gs=P.find(x=>x.role=='Gossip'&&x.alive&&Object.keys(x.known).length>=GOSSIP);
+ if(gs)return W(`${gs.name} the Gossip knows everyone’s business!`,[gs]);
+ const bh=P.find(x=>x.role=='Bounty Hunter'&&x.alive&&(x.kills||0)>=2);
+ if(bh)return W(`${bh.name} the Bounty Hunter collected two bounties!`,[bh]);
  const cr=al.filter(x=>fac(x.role)=='Criminal Network').length,ind=al.filter(x=>fac(x.role)=='Independent').length;
  if(!ch.alive){if(al.length==1&&fac(al[0].role)=='Independent')W(`${al[0].name} is the last one standing!`,al);
   else W('The Chairman has fallen. The Criminal Network takes over Kampala!',P.filter(x=>fac(x.role)=='Criminal Network'))}
@@ -384,10 +416,10 @@ function win(){
 // ================= turns =================
 async function run(){
  const ch=P.find(x=>x.role=='Chairman');L('Night falls over Kampala…');
- await Promise.all(P.filter(x=>x.human).map(h=>ask(h,`<b>Your role: <span style="color:${FC[fac(h.role)]}">${h.role}</span></b> (${fac(h.role)})<br>${RD[h.role]}<br><br><b>Character: ${h.ch[0]}</b><br>${h.ch[2]}<br><br>The LC Chairman is <b>${ch.name}</b>. Nobody else’s role is known.`,['Got it'])));
+ await Promise.all(P.filter(x=>x.human).map(h=>ask(h,`<b>Your role: <span style="color:${FC[fac(h.role)]}">${h.role}</span></b> (${fac(h.role)})<br>${RD[h.role]}<br><br><b>Character: ${h.ch[0]}</b><br>${h.ch[2]}<br><br>The LC Chairman is <b>${ch.name}</b>. Nobody else’s role is known.${poolTxt(h)}`,['Got it'])));
  while(!over){
   const p=order[ptr];
-  if(p.alive){cur=p;await turn(p);cur=null;push()}
+  if(p.alive){cur=p;await turn(p);p.clamp=0;cur=null;push()}
   if(over)break;
   const o=ptr;do{ptr=(ptr+1)%order.length}while(!order[ptr].alive);
   if(ptr<=o){round++;if(round>MAXR){const s=P.find(x=>x.role=='Survivor'&&x.alive);if(s){over=1;wt=`${s.name} the Survivor made it through the night!`;winners=[s];L(`<b>${wt}</b>`)}}}
@@ -419,8 +451,8 @@ function score(p,o){
  if(r){if(pf=='Community')s+=f=='Criminal Network'?10:f=='Community'?-10:0;
   else if(pf=='Criminal Network')s+=r=='Chairman'?12:f=='Criminal Network'?-10:f=='Community'?3:1;
   else s+=f=='Independent'?0:1}
- else if(pf=='Criminal Network')s+=.5;
- if(pf=='Independent')s-=1.5;
+ else if(p.pool)s+=p.pool.has(o.i)?-4:3;else if(pf=='Criminal Network')s+=.5;
+ if(pf=='Independent')s+=p.role=='Bounty Hunter'?2.5+Math.max(0,3-o.hp):-1.5;
  return s;
 }
 function botPick(p){
@@ -431,10 +463,14 @@ function botPick(p){
   for(const o of others(p))if(good(c,o)){const s=score(p,o);if(s>bs){bs=s;b=o}}
   if(!b&&Math.random()<.2)b=pick(others(p).filter(o=>good(c,o)&&score(p,o)>-5));
   if(b)return{c,t:b}}
- if((c=f(PH))&&Math.random()<(fac(p.role)=='Criminal Network'?.15:.5)){const o=pick(others(p).filter(o=>!kr(p,o)));if(o)return{c,t:o}}
+ if((c=f(PH))&&Math.random()<(p.role=='Gossip'?1:fac(p.role)=='Criminal Network'?.15:.5)){const o=pick(others(p).filter(o=>!kr(p,o)));if(o)return{c,t:o}}
  if((c=f(MM))&&(p.role=='Hustler'||Math.random()<.6)){const o=pick(others(p).filter(o=>good(c,o)));if(o)return{c,t:o}}
- for(const t of[TJ,PC])if(c=f(t)){const o=others(p).filter(o=>good(c,o)&&score(p,o)>2.5).sort((a,b)=>score(p,b)-score(p,a))[0];if(o)return{c,t:o}}
+ for(const t of[TJ,PC,CL,PT])if(c=f(t)){const o=others(p).filter(o=>good(c,o)&&score(p,o)>2.5).sort((a,b)=>score(p,b)-score(p,a))[0];if(o)return{c,t:o}}
  if((c=f(BO))&&f(M)&&Math.random()<.5){const o=others(p).filter(o=>score(p,o)>2.5&&dist(p,o)>rng(p))[0];if(o)return{c,t:o}}
+ if(c=f(PB)){const val=o=>{const r=kr(p,o),d=o.max-o.hp;return d<1?-9:o===p?3+d:r&&fac(r)==fac(p.role)?2+d:-1};const o=P.filter(x=>x.alive&&good(c,x)).sort((a,b)=>val(b)-val(a))[0];if(o&&val(o)>0)return{c,t:o}}
+ if(c=f(UT)){const o=others(p).filter(o=>good(c,o)&&o.coins>=3).sort((a,b)=>b.coins-a.coins)[0];if(o)return{c,t:o}}
+ if((c=f(SH))&&f(M)&&Math.random()<.5){const o=others(p).filter(o=>score(p,o)>2.5&&dist(p,o)>rng(p))[0];if(o)return{c,t:o}}
+ if((c=f(KD)||f(BZ))&&p.hand.length<=4)return{c};
  if((c=f(RA))&&p.hand.length<=3&&Math.random()<.5)return{c};
  if((c=f(MA))&&seats.length>=3&&Math.random()<.35)return{c};
  if((c=f(KT))&&Math.random()<.35)return{c};
@@ -452,10 +488,10 @@ function view(p){
   info:`Round ${Math.min(round,MAXR)}/${MAXR} · Order: `+order.filter(x=>x.alive).map(x=>x===cur?`[${first(x)}]`:first(x)).join(' › '),
   banner:over?'':w?(p.toast||waitOn.msg):(idle||(cur?`${cur.name} is ${cur.human?'taking their turn':'playing'}…`:'')),
   mode:w?waitOn.mode:'',host:p===hostP,
-  players:[...seats,...P.filter(x=>!x.alive)].map(o=>({i:o.i,name:o.name,bot:!o.human,ch:o.ch[0],cut:o.cut,skip:o.skip,alive:o.alive,hp:o.hp,max:o.max,cards:o.hand.length,coins:o.coins,role:kr(p,o),cur:o===cur,me:o===p,
+  players:[...seats,...P.filter(x=>!x.alive)].map(o=>({i:o.i,name:o.name,bot:!o.human,ch:o.ch[0],cut:o.cut,skip:o.skip,alive:o.alive,hp:o.hp,max:o.max,cards:o.hand.length,coins:o.coins,role:kr(p,o),clamp:o.clamp,hint:!kr(p,o)&&p.pool&&p.pool.has(o.i)?(p.role=='Informant'?'Community — or the Insider':'Gangster — or the Informant'):'',cur:o===cur,me:o===p,
    d:p.alive&&o.alive&&o!==p?dist(p,o):null,tg:w&&waitOn.mode=='play'&&sel&&o.alive?(ok(p,sel,o)?'dim':'tg'):''})),
   log:log.filter(e=>e.o===undefined||e.o===p.i).slice(-80).map(e=>e.t),
-  me:{role:p.role,ch:p.ch[0],desc:p.ch[2],cut:p.cut,range:rng(p),sel:w&&sel?sel.id:null,hand:p.hand.map(c=>({id:c.id,t:c.t}))},
+  me:{prog:p.role=='Gossip'?`Roles learned: ${Object.keys(p.known).length}/${GOSSIP}`:p.role=='Bounty Hunter'?`Eliminations: ${p.kills||0}/2`:p.role=='Hustler'?`Coins: ${p.coins}/${GOAL}`:'',role:p.role,ch:p.ch[0],desc:p.ch[2],cut:p.cut,range:rng(p),sel:w&&sel?sel.id:null,hand:p.hand.map(c=>({id:c.id,t:c.t}))},
   prompt:pr?{html:pr.html,opts:pr.opts}:null,
   over:over&&finInfo?finInfo:null
  };
@@ -466,10 +502,10 @@ function render(v){
  if(!v)return;
  document.title=v.mode=='play'?'▶ Your turn — Kampala':'Kampala: After Dark';
  $('info').textContent=v.info;$('ban').textContent=v.banner;
- $('pl').innerHTML=v.players.map(o=>`<button class="pr ${o.tg} ${o.cur?'cur':''} ${o.alive?'':'dead'} ${o.me?'me':''}" onclick="act({k:'tgt',i:${o.i}})"><b>${o.name}${o.me?' (you)':''}${o.bot?' <small>(bot)</small>':''}${v.host&&!o.me&&!o.bot&&o.alive?` <span class="kk" onclick="event.stopPropagation();act({k:'bot',i:${o.i}})">replace with bot</span>`:''}</b><small>${o.ch}${o.cut?' <u class="rd">POWER CUT</u>':''}</small><span style="color:${o.role?FC[fac(o.role)]:'var(--mu)'}">${o.role||'Role: ???'}</span><span>${o.alive?`HP ${o.hp}/${o.max} · Cards ${o.cards} · Coins ${o.coins}${o.skip?' · <u>JAM</u>':''}${o.d!=null?` · distance ${o.d}`:''}`:'ELIMINATED'}</span><i style="width:${Math.max(0,o.hp)/o.max*100}%"></i></button>`).join('');
+ $('pl').innerHTML=v.players.map(o=>`<button class="pr ${o.tg} ${o.cur?'cur':''} ${o.alive?'':'dead'} ${o.me?'me':''}" onclick="act({k:'tgt',i:${o.i}})"><b>${o.name}${o.me?' (you)':''}${o.bot?' <small>(bot)</small>':''}${v.host&&!o.me&&!o.bot&&o.alive?` <span class="kk" onclick="event.stopPropagation();act({k:'bot',i:${o.i}})">replace with bot</span>`:''}</b><small>${o.ch}${o.cut?' <u class="rd">POWER CUT</u>':''}</small><span style="color:${o.role?FC[fac(o.role)]:o.hint?FC[v.me.role=='Informant'?'Community':'Criminal Network']:'var(--mu)'}">${o.role||o.hint||'Role: ???'}</span><span>${o.alive?`HP ${o.hp}/${o.max} · Cards ${o.cards} · Coins ${o.coins}${o.skip?' · <u>JAM</u>':''}${o.clamp?' · <u>CLAMPED</u>':''}${o.d!=null?` · distance ${o.d}`:''}`:'ELIMINATED'}</span><i style="width:${Math.max(0,o.hp)/o.max*100}%"></i></button>`).join('');
  const lg=$('log');lg.innerHTML=v.log.map(t=>`<div>${t}</div>`).join('');lg.scrollTop=lg.scrollHeight;
  const m=v.me;
- $('me').innerHTML=`<b style="color:${FC[fac(m.role)]}">${m.role}</b> (${fac(m.role)}) — ${RD[m.role]}<br><b>${m.ch}</b>${m.cut?' <span class="rd">[POWER CUT]</span>':''}: ${m.desc} · Mugging range ${m.range}`;
+ $('me').innerHTML=`<b style="color:${FC[fac(m.role)]}">${m.role}</b> (${fac(m.role)}) — ${RD[m.role]}<br><b>${m.ch}</b>${m.cut?' <span class="rd">[POWER CUT]</span>':''}: ${m.desc} · Mugging range ${m.range}${m.prog?'<br><b>'+m.prog+'</b>':''}`;
  $('hand').innerHTML=m.hand.map(c=>`<button class="card ${m.sel===c.id?'sel':''} ${v.mode=='discard'?'dc':''}" style="--c:${COL[c.t]}" onclick="act({k:'card',id:${c.id}})"><b>${CT[c.t][0]}</b><small>${CT[c.t][1]}</small></button>`).join('');
  $('end').disabled=v.mode!='play';
  const ov=$('ov'),bx=$('box');
