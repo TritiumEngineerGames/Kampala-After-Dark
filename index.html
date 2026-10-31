@@ -234,62 +234,292 @@ function poolTxt(h){
 }
 
 // ================= networking =================
-function show(id){['menu','lobby','game'].forEach(x=>$(x).hidden=x!=id)}
-function status(m){$('st').textContent=m;$('st2').textContent=m}
-function needPeer(){if(typeof Peer=='undefined'){status('Could not load the PeerJS library. Check your internet connection.');return 0}return 1}
-function hostGame(){if(!needPeer())return;isHost=true;myName=clean($('nm').value);tryHost()}
+// ================= networking =================
+
+function show(id){
+  ['menu','lobby','game'].forEach(x=>$(x).hidden=x!=id);
+}
+
+function status(m){
+  $('st').textContent=m;
+  $('st2').textContent=m;
+}
+
+function needPeer(){
+  if(typeof Peer=='undefined'){
+    status('Could not load PeerJS. Check your internet connection.');
+    return 0;
+  }
+  return 1;
+}
+
+function hostGame(){
+  if(!needPeer())return;
+  isHost=true;
+  myName=clean($('nm').value);
+  tryHost();
+}
+
 function tryHost(){
- const code=Array.from({length:5},()=>'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[rnd(31)]).join('');
- peer=new Peer('kampala-'+code);
- peer.on('open',()=>{CODE=code;members=[{name:myName,conn:null}];phase='lobby';lobbyPush()});
- peer.on('error',e=>{if(e.type=='unavailable-id')tryHost();else status('Network error: '+e.type)});
- peer.on('connection',c=>{c.on('data',d=>hostData(c,d));c.on('close',()=>drop(c))});
+  const code=Array.from(
+    {length:5},
+    ()=>'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[rnd(31)]
+  ).join('');
+
+  const newPeer=new Peer('kampala-'+code);
+  peer=newPeer;
+
+  newPeer.on('open',id=>{
+    if(peer!==newPeer)return;
+
+    CODE=code;
+    members=[{name:myName,conn:null}];
+    phase='lobby';
+    status('');
+    lobbyPush();
+
+    console.log('Host connected:',id);
+  });
+
+  newPeer.on('connection',c=>{
+    console.log('Incoming connection:',c.peer);
+
+    c.on('open',()=>{
+      console.log('Incoming data connection opened:',c.peer);
+    });
+
+    c.on('data',d=>{
+      console.log('Host received:',d);
+      hostData(c,d);
+    });
+
+    c.on('close',()=>{
+      console.log('Connection closed:',c.peer);
+      drop(c);
+    });
+
+    c.on('error',e=>{
+      console.error('Incoming connection error:',e);
+    });
+  });
+
+  newPeer.on('error',e=>{
+    console.error('Host PeerJS error:',e.type,e);
+
+    if(peer!==newPeer)return;
+
+    if(e.type==='unavailable-id'){
+      console.log('Host ID already taken. Generating another.');
+      newPeer.destroy();
+      tryHost();
+    }else{
+      status('Host network error: '+e.type);
+    }
+  });
+
+  newPeer.on('disconnected',()=>{
+    console.warn('Host disconnected from signaling server.');
+    status('Host disconnected from PeerJS server.');
+  });
 }
+
 function joinGame(){
- if(!needPeer())return;
- myName=clean($('nm').value);
- const code=$('jc').value.trim().toUpperCase();
- if(code.length!=5)return status('Enter the 5-character code.');
- status('Connecting…');peer=new Peer();
- peer.on('open',()=>{
-  conn=peer.connect('kampala-'+code,{reliable:true});
-  conn.on('open',()=>{status('');conn.send({t:'join',name:myName})});
-  conn.on('data',cdata);
-  conn.on('close',()=>{status('Disconnected from the host.');if(phase=='game')$('ban').textContent='Disconnected from the host.'});
- });
- peer.on('error',e=>status(e.type=='peer-unavailable'?'No game found with that code.':'Network error: '+e.type));
+  if(!needPeer())return;
+
+  myName=clean($('nm').value);
+  const code=$('jc').value.trim().toUpperCase();
+
+  if(code.length!==5){
+    return status('Enter the 5-character code.');
+  }
+
+  status('Connecting to PeerJS server...');
+
+  const newPeer=new Peer();
+  peer=newPeer;
+
+  let connectionTimer=null;
+
+  newPeer.on('open',id=>{
+    if(peer!==newPeer)return;
+
+    console.log('Joining peer connected:',id);
+    status('Finding host...');
+
+    conn=newPeer.connect('kampala-'+code,{
+      reliable:true,
+      serialization:'json'
+    });
+
+    const c=conn;
+
+    connectionTimer=setTimeout(()=>{
+      if(!c.open){
+        status('Connection timed out. The host may be offline or unreachable.');
+        console.error('Connection timeout:',code);
+        c.close();
+      }
+    },15000);
+
+    c.on('open',()=>{
+      clearTimeout(connectionTimer);
+
+      console.log('Connected to host:',c.peer);
+
+      status('Connected! Joining lobby...');
+      c.send({
+        t:'join',
+        name:myName
+      });
+    });
+
+    c.on('data',d=>{
+      console.log('Received from host:',d);
+      cdata(d);
+    });
+
+    c.on('close',()=>{
+      clearTimeout(connectionTimer);
+
+      console.warn('Host connection closed.');
+      status('Disconnected from the host.');
+
+      if(phase==='game'){
+        $('ban').textContent='Disconnected from the host.';
+      }
+    });
+
+    c.on('error',e=>{
+      clearTimeout(connectionTimer);
+      console.error('Data connection error:',e);
+      status('Connection error: '+e.type);
+    });
+  });
+
+  newPeer.on('error',e=>{
+    console.error('Join PeerJS error:',e.type,e);
+
+    if(e.type==='peer-unavailable'){
+      status('No game found with that code. Check that the host is still online.');
+    }else{
+      status('Network error: '+e.type);
+    }
+  });
+
+  newPeer.on('disconnected',()=>{
+    console.warn('Joiner disconnected from signaling server.');
+  });
 }
+
 function hostData(c,d){
- if(!d||typeof d!='object')return;
- if(d.t=='join'){
-  if(members.some(m=>m.conn===c))return;
-  if(phase!='lobby'||members.length>=12){c.send({t:'err',m:phase!='lobby'?'That game has already started.':'That game is full.'});return setTimeout(()=>c.close(),400)}
-  members.push({name:clean(d.name),conn:c});lobbyPush();
- }else if(d.t=='act'){const p=P.find(x=>x.conn===c);if(p&&phase=='game')onAct(p,d.a)}
+  if(!d||typeof d!=='object')return;
+
+  if(d.t==='join'){
+    if(members.some(m=>m.conn===c))return;
+
+    if(phase!=='lobby'||members.length>=12){
+      c.send({
+        t:'err',
+        m:phase!=='lobby'
+          ?'That game has already started.'
+          :'That game is full.'
+      });
+
+      setTimeout(()=>c.close(),400);
+      return;
+    }
+
+    members.push({
+      name:clean(d.name),
+      conn:c
+    });
+
+    console.log('Player joined:',d.name);
+    lobbyPush();
+
+  }else if(d.t==='act'){
+    const p=P.find(x=>x.conn===c);
+
+    if(p&&phase==='game'){
+      onAct(p,d.a);
+    }
+  }
 }
+
 function drop(c){
- if(phase=='lobby'){members=members.filter(m=>m.conn!==c);lobbyPush()}
- else{const p=P.find(x=>x.conn===c);if(p)abandon(p)}
+  if(phase==='lobby'){
+    members=members.filter(m=>m.conn!==c);
+    lobbyPush();
+  }else{
+    const p=P.find(x=>x.conn===c);
+    if(p)abandon(p);
+  }
 }
+
 function cdata(d){
- if(!d)return;
- if(d.t=='lobby'){phase='lobby';showLobby(d.names,d.code)}
- else if(d.t=='view'){if(phase!='game'){phase='game';show('game')}render(d.v)}
- else if(d.t=='err')status(d.m);
+  if(!d)return;
+
+  if(d.t==='lobby'){
+    phase='lobby';
+    showLobby(d.names,d.code);
+
+  }else if(d.t==='view'){
+    if(phase!=='game'){
+      phase='game';
+      show('game');
+    }
+
+    render(d.v);
+
+  }else if(d.t==='err'){
+    status(d.m);
+  }
 }
+
 function lobbyPush(){
- const names=members.map(m=>m.name);
- members.forEach(m=>{if(m.conn&&m.conn.open)m.conn.send({t:'lobby',names,code:CODE})});
- showLobby(names,CODE);
+  const names=members.map(m=>m.name);
+
+  members.forEach(m=>{
+    if(m.conn&&m.conn.open){
+      m.conn.send({
+        t:'lobby',
+        names,
+        code:CODE
+      });
+    }
+  });
+
+  showLobby(names,CODE);
 }
+
 function showLobby(names,code){
- show('lobby');$('code').textContent=code;
- $('lnk').textContent=location.origin+location.pathname+'?join='+code;
- $('mem').innerHTML=names.map((n,i)=>`<div>${n}${i==0?' <span class="or">(host)</span>':''}</div>`).join('');
- $('hostctl').hidden=!isHost;$('lwait').hidden=isHost;
+  show('lobby');
+
+  $('code').textContent=code;
+
+  $('lnk').textContent=
+    location.origin+location.pathname+'?join='+code;
+
+  $('mem').innerHTML=names.map((n,i)=>
+    `<div>${n}${i===0?' <span class="or">(host)</span>':''}</div>`
+  ).join('');
+
+  $('hostctl').hidden=!isHost;
+  $('lwait').hidden=isHost;
 }
-function copyLink(){const t=$('lnk').textContent;navigator.clipboard&&navigator.clipboard.writeText(t)}
-function act(a){if(isHost)onAct(hostP,a);else if(conn&&conn.open)conn.send({t:'act',a})}
+
+function copyLink(){
+  const t=$('lnk').textContent;
+  navigator.clipboard&&navigator.clipboard.writeText(t);
+}
+
+function act(a){
+  if(isHost){
+    onAct(hostP,a);
+  }else if(conn&&conn.open){
+    conn.send({t:'act',a});
+  }
+}
 
 let pend=0;
 function push(){
